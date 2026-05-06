@@ -205,6 +205,7 @@ export default function Chat() {
   const [broadcastText, setBroadcastText] = useState("");
   const [broadcastSending, setBroadcastSending] = useState(false);
   const [broadcastDone, setBroadcastDone] = useState(false);
+  const [loadingGroups, setLoadingGroups] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -237,7 +238,7 @@ export default function Chat() {
       });
 
     supabase.from("groups").select("*").order("member_count", { ascending: false })
-      .then(({ data }) => { if (data) setGroups(data); });
+      .then(({ data }) => { setGroups(data || []); setLoadingGroups(false); });
 
     return () => { if (realtimeRef.current) supabase.removeChannel(realtimeRef.current); };
   }, []);
@@ -564,7 +565,7 @@ export default function Chat() {
               </div>
             </div>
             {isDoctor && (
-              <a href="tel:80000030 30" className="p-2 bg-gray-100 rounded-full text-gray-500">
+              <a href="tel:800003030" aria-label="Appeler" className="p-2 bg-gray-100 rounded-full text-gray-500">
                 <Phone className="w-4 h-4" />
               </a>
             )}
@@ -695,7 +696,7 @@ export default function Chat() {
                   <Flag className="w-5 h-5 text-rose-500" />
                   <h3 className="font-extrabold text-gray-900 text-base">Signaler ce message</h3>
                 </div>
-                <button onClick={() => setReportTarget(null)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <button onClick={() => setReportTarget(null)} aria-label="Fermer" className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                   <X className="w-4 h-4 text-gray-500" />
                 </button>
               </div>
@@ -798,7 +799,6 @@ export default function Chat() {
     { key: "soignants", label: "Soignants" },
     { key: "patients",  label: "Pairs" },
     { key: "groupes",   label: "Groupes" },
-    { key: "ia",        label: "IA" },
   ];
 
   return (
@@ -806,7 +806,7 @@ export default function Chat() {
       {/* Header */}
       <div className="bg-white px-4 pt-4 pb-3 border-b border-gray-100 shadow-sm">
         <div className="flex items-center gap-3 mb-3">
-          <button onClick={() => navigate("/app")} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center shrink-0">
+          <button onClick={() => navigate("/app/echanges")} aria-label="Retour aux échanges" className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center shrink-0">
             <ArrowLeft className="w-4 h-4 text-gray-600" />
           </button>
           <h2 className="text-xl font-extrabold text-gray-900 flex-1">Messages</h2>
@@ -959,7 +959,8 @@ export default function Chat() {
         {/* Groupes */}
         {tab === "groupes" && (
           <div className="flex flex-col gap-1 p-4">
-            {groups.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Chargement des groupes...</p>}
+            {loadingGroups && <p className="text-sm text-gray-400 text-center py-8">Chargement des groupes...</p>}
+            {!loadingGroups && groups.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Aucun groupe disponible pour l'instant.</p>}
             {groups.map(g => (
               <button key={g.id} onClick={() => openGroup(g)}
                 className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-sm border border-gray-100 mb-2 text-left hover:shadow-md transition-shadow">

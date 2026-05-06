@@ -2,11 +2,19 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router";
 import { supabase } from "../../lib/supabaseClient";
 
+// ╔══════════════════════════════════════════════════════════╗
+// ║  MODE TEST — AUTH DÉSACTIVÉE                            ║
+// ║  Mettre à false pour réactiver la vraie authentification ║
+// ╚══════════════════════════════════════════════════════════╝
+const TEST_MODE = true;
+
 export function AuthGuard() {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
+    if (TEST_MODE) { setAuthenticated(true); setLoading(false); return; }
+
     supabase.auth.getSession().then(({ data }) => {
       setAuthenticated(!!data.session);
       setLoading(false);
@@ -28,7 +36,7 @@ export function AuthGuard() {
 
   if (!authenticated) return <Navigate to="/auth" replace />;
 
-  if (!localStorage.getItem("pp_onboarded")) return <Navigate to="/onboarding" replace />;
+  if (!TEST_MODE && !localStorage.getItem("pp_onboarded")) return <Navigate to="/onboarding" replace />;
 
   return <Outlet />;
 }

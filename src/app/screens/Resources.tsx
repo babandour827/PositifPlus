@@ -5,7 +5,7 @@ import {
   Shield, Users, Pill, Baby, Sun, ChevronDown, ExternalLink,
   TrendingUp, Award, AlertCircle, CheckCircle2, Globe, Download,
   Stethoscope, Microscope, Syringe, HeartHandshake, Leaf, Zap,
-  BookMarked, Link, Smartphone, Building2, HelpCircle
+  BookMarked, Link, Smartphone, Building2, HelpCircle, Bell, BarChart2, X as XIcon
 } from "lucide-react";
 import { useState } from "react";
 
@@ -380,7 +380,9 @@ export function Resources() {
               })}
             </div>
             {activeCategory && (
-              <button onClick={() => setActiveCategory(null)} className="mt-2 text-xs font-bold text-gray-500 underline">✕ Effacer le filtre</button>
+              <button onClick={() => setActiveCategory(null)} className="mt-2 text-xs font-bold text-gray-500 underline flex items-center gap-1">
+                <XIcon className="w-3 h-3" /> Effacer le filtre
+              </button>
             )}
           </div>
 
@@ -618,7 +620,7 @@ export function Resources() {
             <div>
               <h4 className="text-sm font-bold text-gray-900">Vous avez d'autres questions ?</h4>
               <p className="text-xs font-medium text-gray-500 mb-2 leading-tight">Notre assistant IA répond en temps réel, 24h/24.</p>
-              <a href="/app/ai-assistant" className="text-xs font-bold bg-[#10AC84] text-white px-3 py-1.5 rounded-full shadow-sm inline-block">
+              <a href="/app/echanges" className="text-xs font-bold bg-[#10AC84] text-white px-3 py-1.5 rounded-full shadow-sm inline-block">
                 Poser une question →
               </a>
             </div>
@@ -726,13 +728,15 @@ export function Resources() {
             </h3>
             <div className="flex flex-col gap-3">
               {[
-                { name: "MyTherapy", desc: "Rappels médicaments, suivi de santé et journaux", platform: "iOS & Android", icon: "💊" },
-                { name: "Medisafe", desc: "Gestion des ordonnances et interactions médicamenteuses", platform: "iOS & Android", icon: "🔔" },
-                { name: "HIV iChart", desc: "Référentiel clinique pour PVVIH et soignants", platform: "iOS & Android", icon: "📊" },
-                { name: "AIDSinfo", desc: "Informations officielles sur les traitements (NIH)", platform: "Web & Mobile", icon: "🔬" },
+                { name: "MyTherapy", desc: "Rappels médicaments, suivi de santé et journaux", platform: "iOS & Android", icon: Pill, iconColor: "text-teal-600", iconBg: "bg-teal-50" },
+                { name: "Medisafe", desc: "Gestion des ordonnances et interactions médicamenteuses", platform: "iOS & Android", icon: Bell, iconColor: "text-orange-600", iconBg: "bg-orange-50" },
+                { name: "HIV iChart", desc: "Référentiel clinique pour PVVIH et soignants", platform: "iOS & Android", icon: BarChart2, iconColor: "text-blue-600", iconBg: "bg-blue-50" },
+                { name: "AIDSinfo", desc: "Informations officielles sur les traitements (NIH)", platform: "Web & Mobile", icon: Microscope, iconColor: "text-purple-600", iconBg: "bg-purple-50" },
               ].map((app, i) => (
                 <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-2xl shrink-0">{app.icon}</div>
+                  <div className={`w-12 h-12 ${app.iconBg} rounded-2xl flex items-center justify-center shrink-0`}>
+                    <app.icon className={`w-6 h-6 ${app.iconColor}`} />
+                  </div>
                   <div className="flex-1">
                     <p className="text-sm font-bold text-gray-900">{app.name}</p>
                     <p className="text-xs font-medium text-gray-500">{app.desc}</p>
@@ -754,7 +758,7 @@ export function Resources() {
             <div>
               <h4 className="text-sm font-bold text-gray-900">Assistant IA disponible 24h/24</h4>
               <p className="text-xs font-medium text-gray-500 mb-2 leading-tight">Posez vos questions médicales en toute confidentialité.</p>
-              <a href="/app/ai-assistant" className="text-xs font-bold bg-[#10AC84] text-white px-3 py-1.5 rounded-full shadow-sm inline-block">
+              <a href="/app/echanges" className="text-xs font-bold bg-[#10AC84] text-white px-3 py-1.5 rounded-full shadow-sm inline-block">
                 Démarrer une conversation →
               </a>
             </div>

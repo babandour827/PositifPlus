@@ -277,7 +277,7 @@ export function Community() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
-              type="text"
+              type="search"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher un groupe..."
@@ -372,7 +372,11 @@ export function Community() {
                       {(commentMap[post.id]?.length ?? post.comments)}
                       {isCommentsOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                     </button>
-                    <button className="flex items-center gap-1.5 text-xs font-bold text-gray-500 ml-auto">
+                    <button
+                      aria-label="Partager ce post"
+                      onClick={() => navigator.share?.({ title: post.title, text: post.content }).catch(() => {})}
+                      className="flex items-center gap-1.5 text-xs font-bold text-gray-500 ml-auto hover:text-[#FF9F43] transition-colors"
+                    >
                       <Share2 className="w-4 h-4" />
                     </button>
                   </div>

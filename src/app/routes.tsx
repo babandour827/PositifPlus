@@ -1,6 +1,7 @@
 import { createBrowserRouter, Outlet } from "react-router";
 import { Layout } from "./components/Layout";
 import { AuthGuard } from "./components/AuthGuard";
+import PosPlus from "./screens/PosPlus";
 import { Splash } from "./screens/Splash";
 import { Auth } from "./screens/Auth";
 import { Onboarding } from "./screens/Onboarding";
@@ -12,6 +13,7 @@ import { Profile } from "./screens/Profile";
 import { Notifications } from "./screens/Notifications";
 import { AIAssistant } from "./screens/AIAssistant";
 import Chat from "./screens/Chat";
+import { Echanges } from "./screens/Echanges";
 import { HeartPulse } from "lucide-react";
 import { Link } from "react-router";
 import { PinLockOverlay } from "./components/PinLockOverlay";
@@ -58,6 +60,7 @@ export const router = createBrowserRouter([
             Component: Layout,
             children: [
               { index: true,           Component: Home },
+              { path: "echanges",    Component: Echanges },
               { path: "community",   Component: Community },
               { path: "tracking",    Component: Tracking },
               { path: "resources",   Component: Resources },
@@ -69,6 +72,7 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      { path: "/pos-plus", Component: PosPlus },
       { path: "*", Component: NotFound },
     ],
   },

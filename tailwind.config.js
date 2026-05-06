@@ -7,6 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
+        brand: {
+          mint: '#1D9E75',
+          amber: '#EF9F27',
+          beige: '#F1EFE8',
+          night: '#04342C',
+          coral: '#D85A30',
+        },
         primary: {
           50: '#ecfdf5',
           100: '#d1fae5',

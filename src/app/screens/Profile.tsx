@@ -327,16 +327,18 @@ function HistoriqueSection({ onBack, userId }: { onBack: () => void; userId: str
   );
 }
 
-// Préférences de notification
+const NOTIF_PREFS_KEY = "pp_notif_prefs";
+const DEFAULT_PREFS = {
+  rappelARV: true, rappelRDV: true, resultatsLabo: true,
+  actualites: false, messages: true, objectifs: true, urgences: true,
+};
+
 function NotificationsSection({ onBack }: { onBack: () => void }) {
-  const [prefs, setPrefs] = useState({
-    rappelARV: true,
-    rappelRDV: true,
-    resultatsLabo: true,
-    actualites: false,
-    messages: true,
-    objectifs: true,
-    urgences: true,
+  const [prefs, setPrefs] = useState(() => {
+    try {
+      const stored = localStorage.getItem(NOTIF_PREFS_KEY);
+      return stored ? { ...DEFAULT_PREFS, ...JSON.parse(stored) } : DEFAULT_PREFS;
+    } catch { return DEFAULT_PREFS; }
   });
   const [saved, setSaved] = useState(false);
 
@@ -345,6 +347,7 @@ function NotificationsSection({ onBack }: { onBack: () => void }) {
   }
 
   function save() {
+    localStorage.setItem(NOTIF_PREFS_KEY, JSON.stringify(prefs));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }

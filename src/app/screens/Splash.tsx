@@ -32,11 +32,12 @@ export function Splash() {
   }
 
   useEffect(() => {
+    if (showStealth) return; // le splash attend que le mode discret soit déverrouillé
     const t1 = setTimeout(() => setPhase("hold"), 600);
     const t2 = setTimeout(() => setPhase("out"), 2000);
     const t3 = setTimeout(redirect, 2500);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []);
+  }, [showStealth]);
 
   if (showStealth) {
     return (

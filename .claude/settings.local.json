@@ -8,5 +8,8 @@
       "Bash(del \"src\\\\app\\\\components\\\\BottomNav.tsx\")",
       "Bash(node_modules/.bin/tsc --noEmit)"
     ]
+  },
+  "enabledPlugins": {
+    "engineering-skills@claude-code-skills": true
   }
 }

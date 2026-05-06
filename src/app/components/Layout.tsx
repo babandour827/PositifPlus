@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useLocation, useNavigate } from "react-router";
-import { Home, Users, HeartPulse, BookOpen, User, Phone, Bell, ChevronLeft, Flame } from "lucide-react";
+import { Home, MessageCircle, HeartPulse, BookOpen, User, Phone, Bell, ChevronLeft, Flame } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Link } from "react-router";
 import { useState, useEffect } from "react";
@@ -10,8 +10,7 @@ export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const isProfile = location.pathname === "/app/profile";
-  // Chat garde le mode plein écran (interface messagerie) — AIAssistant récupère le header normal
-  const isFullscreen = ["/app/chat"].includes(location.pathname);
+  const isFullscreen = false;
   const [pseudo, setPseudo] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const { streak } = useStreak();
@@ -19,7 +18,6 @@ export function Layout() {
   // Pages avec bouton retour
   const BACK_ROUTES: Record<string, { label: string; to: string }> = {
     "/app/notifications": { label: "Retour", to: "/app" },
-    "/app/ai-assistant":  { label: "Retour", to: "/app" },
   };
   const backInfo = BACK_ROUTES[location.pathname];
 
@@ -59,9 +57,9 @@ export function Layout() {
           <div className="bg-white/20 p-1 rounded-full animate-pulse">
             <Phone className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="font-semibold text-xs tracking-wide">Ligne Gindima · 800 00 30 30</span>
+          <span className="font-semibold text-xs tracking-wide">Ligne Gindima · 800 003 030</span>
         </div>
-        <a href="tel:80000030 30" className="text-white/90 text-[10px] font-bold bg-black/15 px-2 py-0.5 rounded-full">
+        <a href="tel:800003030" className="text-white/90 text-[10px] font-bold bg-black/15 px-2 py-0.5 rounded-full">
           Appeler
         </a>
       </div>
@@ -127,7 +125,7 @@ export function Layout() {
         <nav className="absolute bottom-0 left-0 right-0 bg-white shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)] pb-4 rounded-t-[2rem] z-50 border-t border-gray-100">
           <div className="flex justify-around items-center px-2 py-3 relative">
             <NavItem to="/app" icon={Home} label="Accueil" end />
-            <NavItem to="/app/community" icon={Users} label="Communauté" />
+            <NavItem to="/app/echanges" icon={MessageCircle} label="Échanges" />
             <div className="relative -top-6">
               <NavLink
                 to="/app/tracking"
