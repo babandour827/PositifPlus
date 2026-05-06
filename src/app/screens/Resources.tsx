@@ -8,6 +8,7 @@ import {
   BookMarked, Link, Smartphone, Building2, HelpCircle, Bell, BarChart2, X as XIcon
 } from "lucide-react";
 import { useState } from "react";
+import { Link as RouterLink } from "react-router";
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
@@ -620,9 +621,9 @@ export function Resources() {
             <div>
               <h4 className="text-sm font-bold text-gray-900">Vous avez d'autres questions ?</h4>
               <p className="text-xs font-medium text-gray-500 mb-2 leading-tight">Notre assistant IA répond en temps réel, 24h/24.</p>
-              <a href="/app/echanges" className="text-xs font-bold bg-[#10AC84] text-white px-3 py-1.5 rounded-full shadow-sm inline-block">
+              <RouterLink to="/app/echanges" className="text-xs font-bold bg-[#10AC84] text-white px-3 py-1.5 rounded-full shadow-sm inline-block">
                 Poser une question →
-              </a>
+              </RouterLink>
             </div>
           </div>
         </div>
@@ -758,9 +759,9 @@ export function Resources() {
             <div>
               <h4 className="text-sm font-bold text-gray-900">Assistant IA disponible 24h/24</h4>
               <p className="text-xs font-medium text-gray-500 mb-2 leading-tight">Posez vos questions médicales en toute confidentialité.</p>
-              <a href="/app/echanges" className="text-xs font-bold bg-[#10AC84] text-white px-3 py-1.5 rounded-full shadow-sm inline-block">
+              <RouterLink to="/app/echanges" className="text-xs font-bold bg-[#10AC84] text-white px-3 py-1.5 rounded-full shadow-sm inline-block">
                 Démarrer une conversation →
-              </a>
+              </RouterLink>
             </div>
           </div>
         </div>

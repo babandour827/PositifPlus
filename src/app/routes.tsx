@@ -6,13 +6,10 @@ import { Splash } from "./screens/Splash";
 import { Auth } from "./screens/Auth";
 import { Onboarding } from "./screens/Onboarding";
 import { Home } from "./screens/Home";
-import { Community } from "./screens/Community";
 import { Tracking } from "./screens/Tracking";
 import { Resources } from "./screens/Resources";
 import { Profile } from "./screens/Profile";
 import { Notifications } from "./screens/Notifications";
-import { AIAssistant } from "./screens/AIAssistant";
-import Chat from "./screens/Chat";
 import { Echanges } from "./screens/Echanges";
 import { HeartPulse } from "lucide-react";
 import { Link } from "react-router";
@@ -60,14 +57,11 @@ export const router = createBrowserRouter([
             Component: Layout,
             children: [
               { index: true,           Component: Home },
-              { path: "echanges",    Component: Echanges },
-              { path: "community",   Component: Community },
-              { path: "tracking",    Component: Tracking },
-              { path: "resources",   Component: Resources },
-              { path: "profile",     Component: Profile },
+              { path: "echanges",      Component: Echanges },
+              { path: "tracking",      Component: Tracking },
+              { path: "resources",     Component: Resources },
+              { path: "profile",       Component: Profile },
               { path: "notifications", Component: Notifications },
-              { path: "ai-assistant", Component: AIAssistant },
-              { path: "chat",        Component: Chat },
             ],
           },
         ],

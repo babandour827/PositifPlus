@@ -13,7 +13,7 @@ const TYPE_CONFIG: Record<string, { icon: any; color: string; bg: string; label:
 const ROUTE_MAP: Record<string, string> = {
   alert: "/app/tracking",
   success: "/app/tracking",
-  community: "/app/community",
+  community: "/app/echanges",
   system: "/app/profile",
 };
 
@@ -261,7 +261,7 @@ export function Notifications() {
                   )}
                   {n.type === "community" && (
                     <Link
-                      to="/app/community"
+                      to="/app/echanges"
                       onClick={e => { e.stopPropagation(); markRead(n.id); }}
                       className="mt-3 text-[10px] font-bold text-[#FF9F43] border border-[#FF9F43]/30 px-3 py-1.5 rounded-full inline-block hover:bg-[#FF9F43]/5 transition-colors"
                     >

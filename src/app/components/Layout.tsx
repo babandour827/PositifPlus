@@ -1,21 +1,25 @@
 import { Outlet, NavLink, useLocation, useNavigate } from "react-router";
-import { Home, MessageCircle, HeartPulse, BookOpen, User, Phone, Bell, ChevronLeft, Flame } from "lucide-react";
+import {
+  Home, MessageCircle, HeartPulse, BookOpen, User, Phone, Bell,
+  ChevronLeft, Flame, UserRound, CalendarCheck, MessageSquare, Stethoscope,
+} from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Link } from "react-router";
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { useStreak } from "../../hooks/useStreak";
+import { useProfile } from "../../hooks/useProfile";
 
 export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isSoignant, profile } = useProfile();
   const isProfile = location.pathname === "/app/profile";
   const isFullscreen = false;
   const [pseudo, setPseudo] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const { streak } = useStreak();
 
-  // Pages avec bouton retour
   const BACK_ROUTES: Record<string, { label: string; to: string }> = {
     "/app/notifications": { label: "Retour", to: "/app" },
   };
@@ -66,7 +70,10 @@ export function Layout() {
 
       {/* Header principal */}
       {!isProfile && !isFullscreen && (
-        <header className="px-4 py-3 bg-white shadow-[0_4px_20px_-10px_rgba(0,0,0,0.06)] flex items-center justify-between shrink-0 z-40 relative rounded-b-3xl">
+        <header className={cn(
+          "px-4 py-3 bg-white shadow-[0_4px_20px_-10px_rgba(0,0,0,0.06)] flex items-center justify-between shrink-0 z-40 relative rounded-b-3xl",
+          isSoignant && "border-b-2 border-blue-100"
+        )}>
           {backInfo ? (
             <button
               onClick={() => navigate(backInfo.to)}
@@ -76,33 +83,48 @@ export function Layout() {
             </button>
           ) : (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#FF6B6B] to-[#FF9F43] rounded-xl flex items-center justify-center shadow-md shadow-[#FF6B6B]/20">
-                <span className="text-white font-black text-xl leading-none tracking-tighter">P+</span>
+              <div className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center shadow-md",
+                isSoignant
+                  ? "bg-gradient-to-br from-blue-600 to-indigo-600 shadow-blue-200"
+                  : "bg-gradient-to-br from-[#FF6B6B] to-[#FF9F43] shadow-[#FF6B6B]/20"
+              )}>
+                {isSoignant
+                  ? <Stethoscope className="w-5 h-5 text-white" strokeWidth={2} />
+                  : <span className="text-white font-black text-xl leading-none tracking-tighter">P+</span>
+                }
               </div>
               <div>
-                <h1 className="text-base font-bold text-gray-800 leading-tight">
-                  Positif<span className="text-[#10AC84]">+</span>
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-base font-bold text-gray-800 leading-tight">
+                    {isSoignant ? "Espace Pro" : <>Positif<span className="text-[#10AC84]">+</span></>}
+                  </h1>
+                  {isSoignant && (
+                    <span className="text-[9px] font-black text-blue-600 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                      {profile?.specialite || "Soignant"}
+                    </span>
+                  )}
+                </div>
                 <p className="text-[11px] text-gray-500 font-medium">
-                  Bonjour{pseudo ? `, ${pseudo}` : ""}
+                  {isSoignant ? `Dr. ${pseudo || ""}` : `Bonjour${pseudo ? `, ${pseudo}` : ""}`}
                 </p>
               </div>
             </div>
           )}
 
           <div className="flex items-center gap-2">
-            {/* Flamme streak */}
-            <div className={cn(
-              "flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-black transition-all",
-              streak >= 7 ? "bg-orange-100 text-orange-600" :
-              streak >= 3 ? "bg-amber-50 text-amber-600" :
-              "bg-gray-100 text-gray-500"
-            )}>
-              <Flame className={cn("w-3.5 h-3.5", streak >= 3 ? "fill-current" : "")} />
-              <span>{streak}</span>
-            </div>
+            {!isSoignant && (
+              <div className={cn(
+                "flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-black transition-all",
+                streak >= 7 ? "bg-orange-100 text-orange-600" :
+                streak >= 3 ? "bg-amber-50 text-amber-600" :
+                "bg-gray-100 text-gray-500"
+              )}>
+                <Flame className={cn("w-3.5 h-3.5", streak >= 3 ? "fill-current" : "")} />
+                <span>{streak}</span>
+              </div>
+            )}
 
-            {/* Cloche */}
             <Link to="/app/notifications" className="relative p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-colors">
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
@@ -122,32 +144,68 @@ export function Layout() {
 
       {/* Bottom Nav */}
       {!isFullscreen && (
-        <nav className="absolute bottom-0 left-0 right-0 bg-white shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)] pb-4 rounded-t-[2rem] z-50 border-t border-gray-100">
-          <div className="flex justify-around items-center px-2 py-3 relative">
-            <NavItem to="/app" icon={Home} label="Accueil" end />
-            <NavItem to="/app/echanges" icon={MessageCircle} label="Échanges" />
-            <div className="relative -top-6">
-              <NavLink
-                to="/app/tracking"
-                className={({ isActive }) => cn(
-                  "flex flex-col items-center justify-center w-14 h-14 rounded-full shadow-lg shadow-[#1DD1A1]/30 transition-all duration-300 border-4 border-gray-50",
-                  isActive ? "bg-[#10AC84] scale-110" : "bg-[#1DD1A1] hover:scale-105"
-                )}
-              >
-                <HeartPulse className="w-6 h-6 text-white" strokeWidth={2.5} />
-              </NavLink>
-              <span className="text-[10px] font-medium text-gray-400 absolute -bottom-4 w-full text-center tracking-tight">Suivi</span>
-            </div>
-            <NavItem to="/app/resources" icon={BookOpen} label="Ressources" />
-            <NavItem to="/app/profile" icon={User} label="Profil" />
-          </div>
-        </nav>
+        isSoignant
+          ? <SoignantNav />
+          : <PatientNav />
       )}
     </div>
   );
 }
 
-function NavItem({ to, icon: Icon, label, end }: { to: string; icon: any; label: string; end?: boolean }) {
+/* ── Navigation PATIENT ─────────────────────────────────────────────────── */
+function PatientNav() {
+  return (
+    <nav className="absolute bottom-0 left-0 right-0 bg-white shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.1)] pb-4 rounded-t-[2rem] z-50 border-t border-gray-100">
+      <div className="flex justify-around items-center px-2 py-3 relative">
+        <PatientNavItem to="/app" icon={Home} label="Accueil" end />
+        <PatientNavItem to="/app/echanges" icon={MessageCircle} label="Échanges" />
+        <div className="relative -top-6">
+          <NavLink
+            to="/app/tracking"
+            className={({ isActive }) => cn(
+              "flex flex-col items-center justify-center w-14 h-14 rounded-full shadow-lg shadow-[#1DD1A1]/30 transition-all duration-300 border-4 border-gray-50",
+              isActive ? "bg-[#10AC84] scale-110" : "bg-[#1DD1A1] hover:scale-105"
+            )}
+          >
+            <HeartPulse className="w-6 h-6 text-white" strokeWidth={2.5} />
+          </NavLink>
+          <span className="text-[10px] font-medium text-gray-400 absolute -bottom-4 w-full text-center tracking-tight">Suivi</span>
+        </div>
+        <PatientNavItem to="/app/resources" icon={BookOpen} label="Ressources" />
+        <PatientNavItem to="/app/profile" icon={User} label="Profil" />
+      </div>
+    </nav>
+  );
+}
+
+/* ── Navigation SOIGNANT ────────────────────────────────────────────────── */
+function SoignantNav() {
+  return (
+    <nav className="absolute bottom-0 left-0 right-0 bg-white shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.15)] pb-4 rounded-t-[2rem] z-50 border-t-2 border-blue-100">
+      <div className="flex justify-around items-center px-2 py-3 relative">
+        <SoignantNavItem to="/app" icon={Home} label="Tableau" end />
+        <SoignantNavItem to="/app/echanges" icon={UserRound} label="Patients" />
+        <div className="relative -top-6">
+          <NavLink
+            to="/app/echanges"
+            className={({ isActive }) => cn(
+              "flex flex-col items-center justify-center w-14 h-14 rounded-full shadow-lg shadow-blue-400/30 transition-all duration-300 border-4 border-gray-50",
+              isActive ? "bg-blue-700 scale-110" : "bg-blue-600 hover:scale-105"
+            )}
+          >
+            <CalendarCheck className="w-6 h-6 text-white" strokeWidth={2.5} />
+          </NavLink>
+          <span className="text-[10px] font-medium text-blue-400 absolute -bottom-4 w-full text-center tracking-tight">Agenda</span>
+        </div>
+        <SoignantNavItem to="/app/echanges" icon={MessageSquare} label="Messages" />
+        <SoignantNavItem to="/app/profile" icon={User} label="Profil" />
+      </div>
+    </nav>
+  );
+}
+
+/* ── Composant NavItem PATIENT ──────────────────────────────────────────── */
+function PatientNavItem({ to, icon: Icon, label, end }: { to: string; icon: any; label: string; end?: boolean }) {
   return (
     <NavLink
       to={to}
@@ -160,6 +218,29 @@ function NavItem({ to, icon: Icon, label, end }: { to: string; icon: any; label:
       {({ isActive }) => (
         <>
           <div className={cn("p-1.5 rounded-xl transition-all duration-300", isActive ? "bg-[#FF6B6B]/10" : "bg-transparent group-hover:bg-gray-100")}>
+            <Icon className={cn("w-6 h-6", isActive ? "stroke-[2.5px]" : "stroke-[1.5px]")} />
+          </div>
+          <span className={cn("text-[10px] font-medium tracking-tight", isActive ? "font-bold" : "")}>{label}</span>
+        </>
+      )}
+    </NavLink>
+  );
+}
+
+/* ── Composant NavItem SOIGNANT ─────────────────────────────────────────── */
+function SoignantNavItem({ to, icon: Icon, label, end }: { to: string; icon: any; label: string; end?: boolean }) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) => cn(
+        "flex flex-col items-center justify-center w-16 gap-1 transition-all duration-300 group pt-2",
+        isActive ? "text-blue-600" : "text-gray-400 hover:text-blue-400"
+      )}
+    >
+      {({ isActive }) => (
+        <>
+          <div className={cn("p-1.5 rounded-xl transition-all duration-300", isActive ? "bg-blue-50" : "bg-transparent group-hover:bg-blue-50/50")}>
             <Icon className={cn("w-6 h-6", isActive ? "stroke-[2.5px]" : "stroke-[1.5px]")} />
           </div>
           <span className={cn("text-[10px] font-medium tracking-tight", isActive ? "font-bold" : "")}>{label}</span>
