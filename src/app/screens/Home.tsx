@@ -1,7 +1,8 @@
 import {
   ArrowRight, Calendar, Heart, ShieldAlert, Sparkles, TrendingUp,
   CheckCircle2, Bot, MessageCircle, Stethoscope, BarChart3,
-  AlertTriangle, Users2, Activity, Clock, Pill, Sun, BookOpen, UserRound,
+  AlertTriangle, Users2, Activity, Clock, Pill, Sun, BookOpen,
+  Frown, AlertOctagon, ShieldCheck,
 } from "lucide-react";
 import { Link } from "react-router";
 import { useState, useEffect } from "react";
@@ -215,7 +216,7 @@ export function Home() {
           {atRisk.length === 0 && !loading && (
             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3">
               <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
-                <CheckCircle2 className="w-5 h-5 text-[#10AC84]" />
+                <ShieldCheck className="w-5 h-5 text-[#10AC84]" />
               </div>
               <div>
                 <p className="text-sm font-bold text-emerald-900">Tous les patients sont actifs</p>
@@ -235,13 +236,13 @@ export function Home() {
                   </div>
                   <div className="flex-1">
                     <p className="font-bold text-sm text-gray-900">{p.pseudo}</p>
-                    <p className="text-[10px] font-medium text-gray-500 mt-0.5">
+                    <div className="flex items-center gap-1.5 mt-0.5">
                       {p.mood === "difficile"
-                        ? "😔 Humeur difficile signalée"
+                        ? <><Frown className="w-3 h-3 text-red-500" /><span className="text-[10px] font-medium text-red-600">Humeur difficile signalée</span></>
                         : p.daysAgo === undefined
-                        ? "⚠️ Aucune activité enregistrée"
-                        : `⚠️ Inactif depuis ${p.daysAgo} jour${p.daysAgo > 1 ? "s" : ""}`}
-                    </p>
+                        ? <><AlertOctagon className="w-3 h-3 text-amber-500" /><span className="text-[10px] font-medium text-amber-600">Aucune activité enregistrée</span></>
+                        : <><AlertTriangle className="w-3 h-3 text-amber-500" /><span className="text-[10px] font-medium text-amber-600">Inactif depuis {p.daysAgo} jour{p.daysAgo > 1 ? "s" : ""}</span></>}
+                    </div>
                   </div>
                   <Link to="/app/echanges"
                     className="text-[10px] font-bold text-white bg-blue-600 px-2.5 py-1.5 rounded-full shrink-0">
