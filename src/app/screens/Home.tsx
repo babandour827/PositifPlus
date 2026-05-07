@@ -1,8 +1,8 @@
 import {
-  ArrowRight, Calendar, Heart, ShieldAlert, Sparkles, TrendingUp,
+  ArrowRight, Calendar, Heart, ShieldAlert, Sparkles,
   CheckCircle2, Bot, MessageCircle, Stethoscope, BarChart3,
   AlertTriangle, Users2, Activity, Clock, Pill, Sun, BookOpen,
-  Frown, AlertOctagon, ShieldCheck,
+  Frown, AlertOctagon, ShieldCheck, Bell,
 } from "lucide-react";
 import { Link } from "react-router";
 import { useState, useEffect } from "react";
@@ -110,25 +110,27 @@ export function Home() {
       ]);
       setPdvStats({ patients: patients ?? 0, soignants: soignants ?? 0, posts: posts ?? 0 });
 
-      // Patients à risque pour le soignant
-      const { data: allPatients } = await supabase
-        .from("profiles").select("id, pseudo").eq("is_soignant", false).limit(40);
-      if (allPatients && allPatients.length > 0) {
-        const { data: moods } = await supabase
-          .from("mood_logs").select("user_id, mood, created_at")
-          .in("user_id", allPatients.map(p => p.id))
-          .order("created_at", { ascending: false });
-        const moodMap: Record<string, { mood: string; created_at: string }> = {};
-        (moods || []).forEach(m => { if (!moodMap[m.user_id]) moodMap[m.user_id] = m; });
-        const risky = allPatients
-          .map(p => {
-            const m = moodMap[p.id];
-            const daysAgo = m ? Math.floor((Date.now() - new Date(m.created_at).getTime()) / 86400000) : null;
-            return { pseudo: p.pseudo, mood: m?.mood, daysAgo: daysAgo ?? undefined };
-          })
-          .filter(p => p.mood === "difficile" || p.daysAgo === undefined || p.daysAgo >= 3)
-          .slice(0, 3);
-        setAtRisk(risky);
+      // Patients à risque — chargé uniquement pour les soignants
+      if (isSoignant) {
+        const { data: allPatients } = await supabase
+          .from("profiles").select("id, pseudo").eq("is_soignant", false).limit(40);
+        if (allPatients && allPatients.length > 0) {
+          const { data: moods } = await supabase
+            .from("mood_logs").select("user_id, mood, created_at")
+            .in("user_id", allPatients.map(p => p.id))
+            .order("created_at", { ascending: false });
+          const moodMap: Record<string, { mood: string; created_at: string }> = {};
+          (moods || []).forEach(m => { if (!moodMap[m.user_id]) moodMap[m.user_id] = m; });
+          const risky = allPatients
+            .map(p => {
+              const m = moodMap[p.id];
+              const daysAgo = m ? Math.floor((Date.now() - new Date(m.created_at).getTime()) / 86400000) : null;
+              return { pseudo: p.pseudo, mood: m?.mood, daysAgo: daysAgo ?? undefined };
+            })
+            .filter(p => p.mood === "difficile" || p.daysAgo === undefined || p.daysAgo >= 3)
+            .slice(0, 3);
+          setAtRisk(risky);
+        }
       }
       setLoading(false);
     }
@@ -187,7 +189,7 @@ export function Home() {
               { to: "/app/echanges", icon: MessageCircle, label: "Mes Patients",  sub: "Messagerie CTA",       bg: "bg-blue-50",    color: "text-blue-500" },
               { to: "/app/echanges", icon: BarChart3,     label: "Score PDV",     sub: "Matrice de risque IA", bg: "bg-indigo-50",  color: "text-indigo-500" },
               { to: "/app/echanges", icon: Users2,        label: "Communauté",    sub: "Modération & soutien", bg: "bg-emerald-50", color: "text-[#10AC84]" },
-              { to: "/app/resources",icon: TrendingUp,    label: "Ressources",    sub: "Protocoles & CTA",     bg: "bg-purple-50",  color: "text-purple-500" },
+              { to: "/app/notifications", icon: Bell, label: "Alertes", sub: "Notifications & rappels", bg: "bg-purple-50", color: "text-purple-500" },
             ].map(item => (
               <Link key={item.label} to={item.to} className="bg-white rounded-2xl p-4 flex flex-col gap-3 shadow-sm border border-gray-100 active:scale-95 transition-transform">
                 <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center`}>

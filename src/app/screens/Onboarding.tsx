@@ -106,7 +106,9 @@ export function Onboarding() {
             <div className="flex flex-col gap-3">
               {RGPD_ITEMS.map(item => (
                 <div key={item.id} className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex items-start gap-3">
-                  <span className="text-xl shrink-0">{item.icon}</span>
+                  <div className="w-8 h-8 bg-white rounded-xl border border-gray-200 flex items-center justify-center shrink-0">
+                    <item.icon className="w-4 h-4 text-gray-600" strokeWidth={2} />
+                  </div>
                   <div>
                     <h3 className="text-sm font-bold text-gray-800 mb-0.5">{item.title}</h3>
                     <p className="text-[11px] font-medium text-gray-500 leading-relaxed">{item.desc}</p>
@@ -181,13 +183,13 @@ export function Onboarding() {
               <h3 className="text-sm font-bold text-emerald-900 mb-2">Les 3 piliers de Positif+</h3>
               <div className="flex flex-col gap-2">
                 {[
-                  { icon: "💬", text: "Communauté pair-à-pair anonyme" },
-                  { icon: "🏥", text: "Messagerie sécurisée avec votre CTA" },
-                  { icon: "🤖", text: "Assistant IA médical bienveillant" },
-                ].map(p => (
-                  <div key={p.icon} className="flex items-center gap-2">
-                    <span className="text-base">{p.icon}</span>
-                    <span className="text-xs font-medium text-emerald-800">{p.text}</span>
+                  { icon: MessageCircle, text: "Communauté pair-à-pair anonyme" },
+                  { icon: Building2,     text: "Messagerie sécurisée avec votre CTA" },
+                  { icon: Bot,           text: "Assistant IA médical bienveillant" },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-center gap-2">
+                    <Icon className="w-4 h-4 text-emerald-600 shrink-0" strokeWidth={2} />
+                    <span className="text-xs font-medium text-emerald-800">{text}</span>
                   </div>
                 ))}
               </div>
