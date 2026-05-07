@@ -11,9 +11,9 @@ import { useDailyTasks, getAdherenceHistory } from "../../hooks/useDailyTasks";
 const ICON_MAP: Record<string, any> = { Sun, Droplets, Utensils, Moon };
 
 const MOOD_CONFIG = {
-  bien:      { icon: Smile, label: "Bien",      emoji: "😊", activeBg: "bg-[#10AC84]",  bg: "bg-emerald-50" },
-  moyen:     { icon: Meh,   label: "Moyen",     emoji: "😐", activeBg: "bg-[#FF9F43]",  bg: "bg-orange-50" },
-  difficile: { icon: Frown, label: "Difficile", emoji: "😔", activeBg: "bg-[#FF6B6B]",  bg: "bg-rose-50" },
+  bien:      { icon: Smile, label: "Bien",      activeBg: "bg-[#10AC84]",  bg: "bg-emerald-50" },
+  moyen:     { icon: Meh,   label: "Moyen",     activeBg: "bg-[#FF9F43]",  bg: "bg-orange-50" },
+  difficile: { icon: Frown, label: "Difficile", activeBg: "bg-[#FF6B6B]",  bg: "bg-rose-50" },
 } as const;
 type MoodKey = keyof typeof MOOD_CONFIG;
 
@@ -138,7 +138,7 @@ export function Tracking() {
     await supabase.from("notifications").insert({
       user_id: userId,
       title: "Humeur enregistrée",
-      body: `Votre humeur du jour : ${m === "bien" ? "😊 Bien" : m === "moyen" ? "😐 Moyen" : "😔 Difficile"}`,
+      body: `Votre humeur du jour : ${m === "bien" ? "Bien" : m === "moyen" ? "Moyen" : "Difficile"}`,
       type: "success", is_read: false,
     }).catch(() => {});
   }
@@ -446,7 +446,7 @@ export function Tracking() {
                     mood === key ? `${m.activeBg} border-transparent shadow-lg` : `${m.bg} border-transparent hover:border-gray-200`
                   }`}
                 >
-                  <span className="text-2xl">{m.emoji}</span>
+                  <m.icon className={`w-6 h-6 ${mood === key ? "text-white" : "text-gray-500"}`} strokeWidth={2} />
                   <span className={`text-xs font-bold ${mood === key ? "text-white" : "text-gray-600"}`}>{m.label}</span>
                 </button>
               ))}
@@ -470,7 +470,7 @@ export function Tracking() {
                     if (!cfg) return null;
                     return (
                       <div key={entry.id || i} className={`flex flex-col items-center gap-1.5 shrink-0 ${cfg.bg} rounded-xl p-2.5 min-w-[52px]`}>
-                        <span className="text-lg">{cfg.emoji}</span>
+                        <cfg.icon className="w-5 h-5 text-gray-500" strokeWidth={2} />
                         <span className="text-[8px] font-bold text-gray-500">
                           {new Date(entry.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
                         </span>

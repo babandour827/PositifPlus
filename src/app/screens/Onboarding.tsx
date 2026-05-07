@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { supabase } from "../../lib/supabaseClient";
-import { ChevronRight, MapPin, Globe, ShieldCheck, HeartPulse, Lock, CheckSquare, Square, FileText } from "lucide-react";
+import { ChevronRight, MapPin, Globe, ShieldCheck, HeartPulse, Lock, CheckSquare, Square, FileText, Shield, Handshake, Trash2, MessageCircle, Building2, Bot } from "lucide-react";
 
 const REGIONS = ["Dakar","Thiès","Saint-Louis","Ziguinchor","Kaolack","Diourbel","Fatick","Kaffrine","Kédougou","Kolda","Louga","Matam","Sédhiou","Tambacounda"];
 const CTA_LIST = ["CTA Hôpital de Fann","CTA Hôpital Principal","CTA Hôpital Le Dantec","CTA Ziguinchor","CTA Saint-Louis","CTA Kaolack","CTA Thiès"];
@@ -20,30 +20,10 @@ const STEPS = [
 ];
 
 const RGPD_ITEMS = [
-  {
-    id: "anon",
-    icon: "🔒",
-    title: "Anonymat total",
-    desc: "Votre vrai nom n'est jamais requis ni stocké. Votre pseudonyme est la seule identité visible.",
-  },
-  {
-    id: "data",
-    icon: "🛡️",
-    title: "Données protégées",
-    desc: "Vos données de santé sont chiffrées et hébergées conformément à la Loi n° 2008-12 sur la protection des données personnelles au Sénégal.",
-  },
-  {
-    id: "share",
-    icon: "🤝",
-    title: "Aucun partage sans consentement",
-    desc: "Vos informations ne sont jamais vendues ni partagées avec des tiers sans votre accord explicite.",
-  },
-  {
-    id: "delete",
-    icon: "🗑️",
-    title: "Droit à l'effacement",
-    desc: "Vous pouvez supprimer l'intégralité de votre compte et de vos données à tout moment depuis Paramètres.",
-  },
+  { id: "anon",   icon: Lock,      title: "Anonymat total",                  desc: "Votre vrai nom n'est jamais requis ni stocké. Votre pseudonyme est la seule identité visible." },
+  { id: "data",   icon: Shield,    title: "Données protégées",               desc: "Vos données de santé sont chiffrées et hébergées conformément à la Loi n° 2008-12 sur la protection des données personnelles au Sénégal." },
+  { id: "share",  icon: Handshake, title: "Aucun partage sans consentement", desc: "Vos informations ne sont jamais vendues ni partagées avec des tiers sans votre accord explicite." },
+  { id: "delete", icon: Trash2,    title: "Droit à l'effacement",            desc: "Vous pouvez supprimer l'intégralité de votre compte et de vos données à tout moment depuis Paramètres." },
 ];
 
 export function Onboarding() {

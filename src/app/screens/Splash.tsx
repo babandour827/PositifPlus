@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { supabase } from "../../lib/supabaseClient";
 import { StealthScreen } from "./StealthScreen";
+import { Lock, MapPin, Heart } from "lucide-react";
 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  MODE TEST — AUTH DÉSACTIVÉE                            ║
@@ -182,9 +183,14 @@ export function Splash() {
 
         {/* Badges */}
         <div className="fade-up-3 flex items-center gap-2 mt-6">
-          {["🔒 Anonyme", "🏥 Sénégal", "💚 PVVIH"].map((b) => (
-            <span key={b} className="text-[11px] font-bold text-white/90 bg-white/15 backdrop-blur-sm border border-white/20 px-3 py-1 rounded-full">
-              {b}
+          {[
+            { icon: Lock,   label: "Anonyme" },
+            { icon: MapPin, label: "Sénégal" },
+            { icon: Heart,  label: "PVVIH" },
+          ].map(({ icon: Icon, label }) => (
+            <span key={label} className="flex items-center gap-1 text-[11px] font-bold text-white/90 bg-white/15 backdrop-blur-sm border border-white/20 px-2.5 py-1 rounded-full">
+              <Icon className="w-3 h-3" />
+              {label}
             </span>
           ))}
         </div>
