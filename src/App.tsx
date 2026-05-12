@@ -104,7 +104,7 @@ function GindimaBanner() {
     <div style={{background:`linear-gradient(135deg,${C.gindima1},${C.gindima2})`,padding:"12px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
         <Phone size={18} color="#fff"/>
-        <span style={{color:"#fff",fontWeight:700,fontSize:14}}>Ligne Gindima · 800 00 30 30</span>
+        <span style={{color:"#fff",fontWeight:700,fontSize:14}}>Ligne Gindima · 200 365</span>
       </div>
       <button style={{background:"rgba(255,255,255,.25)",border:"none",borderRadius:20,padding:"5px 14px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Appeler</button>
     </div>
@@ -224,7 +224,7 @@ function PageAccueil({onNav}:{onNav:(t:Tab)=>void}) {
             <div style={{width:44,height:44,borderRadius:12,background:"rgba(255,255,255,.2)",display:"flex",alignItems:"center",justifyContent:"center"}}><Phone size={22} color="#fff"/></div>
             <div>
               <p style={{color:"#fff",fontWeight:700,fontSize:13,margin:0,opacity:.9}}>Urgence VIH · Ligne Gindima</p>
-              <p style={{color:"#fff",fontSize:20,fontWeight:900,margin:"2px 0 0",letterSpacing:.5}}>800 00 30 30</p>
+              <p style={{color:"#fff",fontSize:20,fontWeight:900,margin:"2px 0 0",letterSpacing:.5}}>200 365</p>
             </div>
           </div>
           <button style={{background:"rgba(255,255,255,.25)",border:"none",borderRadius:20,padding:"8px 16px",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Appeler</button>
@@ -610,7 +610,7 @@ function PageIA({onBack}:{onBack:()=>void}) {
     const msg=text||input; if(!msg.trim()||loading)return;
     setInput(""); setMessages(m=>[...m,{role:"user",content:msg}]); setLoading(true);
     try{const reply=await huggingFaceService.sendMessage(messages.map(m=>({role:m.role,content:m.content})),msg);setMessages(m=>[...m,{role:"assistant",content:reply}]);}
-    catch{setMessages(m=>[...m,{role:"assistant",content:"Désolé, une erreur est survenue. Appelez la ligne Gindima : 800 00 30 30."}]);}
+    catch{setMessages(m=>[...m,{role:"assistant",content:"Désolé, une erreur est survenue. Appelez la ligne Gindima : 200 365."}]);}
     setLoading(false);
   }
   return(

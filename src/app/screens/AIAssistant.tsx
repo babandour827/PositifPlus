@@ -56,7 +56,7 @@ export function AIAssistant() {
     } catch {
       setMessages(m => [...m, {
         role: "assistant" as const,
-        content: "Désolé, une erreur est survenue. Pour toute urgence : Ligne Gindima 800 00 30 30.",
+        content: "Désolé, une erreur est survenue. Pour toute urgence : Ligne Gindima 200 365.",
       }]);
     }
     setLoading(false);
@@ -177,8 +177,8 @@ export function AIAssistant() {
             : <Phone className="w-4 h-4 text-rose-500 shrink-0" />}
           <span className={`text-xs font-bold ${isSoignant ? "text-blue-700" : "text-rose-700"}`}>
             {isSoignant
-              ? "Urgence patient : activer protocole PDV · Ligne Gindima 800 00 30 30"
-              : "Urgence : Ligne Gindima 800 00 30 30 (gratuit, 24h/24)"}
+              ? "Urgence patient : activer protocole PDV · Ligne Gindima 200 365"
+              : "Urgence : Ligne Gindima 200 365 (gratuit, 24h/24)"}
           </span>
         </div>
       </div>

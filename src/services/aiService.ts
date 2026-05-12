@@ -5,7 +5,7 @@ const GROQ_MODEL = "llama-3.1-8b-instant";
 // ── Prompt patient : chaleureux, soutien psychosocial ───────────────────────
 const PATIENT_PROMPT = `Tu es un assistant médical bienveillant pour Positif+, plateforme de soutien aux PVVIH au Sénégal.
 - Réponds uniquement sur le VIH/SIDA, ARV, santé, bien-être et soutien psychologique.
-- Pour urgences : ligne Gindima 800 00 30 30 (gratuit 24h/24).
+- Pour urgences : ligne Gindima 200 365 (gratuit 24h/24).
 - Oriente toujours vers le CTA le plus proche.
 - Ton chaleureux, sans jugement, confidentiel.
 - Ne donne jamais de diagnostic. Informe et oriente.
@@ -58,7 +58,7 @@ GARANTIES D'ANONYMAT INVIOLABLE :
   • Biométrie : authentification locale uniquement, jamais transmise aux serveurs
   • Conformité : RGPD + Loi sénégalaise n°2008-12 sur la protection des données
 
-Réponds avec un ton académique, rigoureux mais profondément humain et conscient des réalités sociales sénégalaises. Ne donne pas de diagnostic clinique. Oriente vers les CTA et la ligne Gindima (800 00 30 30) pour les urgences terrain.`;
+Réponds avec un ton académique, rigoureux mais profondément humain et conscient des réalités sociales sénégalaises. Ne donne pas de diagnostic clinique. Oriente vers les CTA et la ligne Gindima (200 365) pour les urgences terrain.`;
 
 export interface ChatMessage { role: "user" | "assistant" | "system"; content: string; }
 
@@ -77,11 +77,11 @@ async function callLLM(systemPrompt: string, history: ChatMessage[], userMessage
       headers: { Authorization: `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ model: GROQ_MODEL, messages, max_tokens: 600, temperature: 0.7 }),
     });
-    if (!res.ok) return "Difficulté technique. Réessayez ou appelez le 800 00 30 30.";
+    if (!res.ok) return "Difficulté technique. Réessayez ou appelez le 200 365.";
     const data = await res.json();
-    return data.choices?.[0]?.message?.content ?? "Pas de réponse. Appelez le 800 00 30 30.";
+    return data.choices?.[0]?.message?.content ?? "Pas de réponse. Appelez le 200 365.";
   } catch {
-    return "Connexion impossible. Appelez la ligne Gindima au 800 00 30 30.";
+    return "Connexion impossible. Appelez la ligne Gindima au 200 365.";
   }
 }
 

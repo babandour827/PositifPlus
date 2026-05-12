@@ -112,14 +112,14 @@ const Dashboard: React.FC = () => {
               <p className="text-red-500 text-xs mt-1">{t('dashboard.emergencyMessage')}</p>
             </div>
             <a
-              href="tel:800003030"
+              href="tel:200365"
               className="flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors flex-shrink-0"
             >
               <Phone size={16} />
               <span className="hidden sm:inline">Gindima</span>
             </a>
           </div>
-          <p className="text-red-400 text-[10px] mt-2">Ligne gratuite : 800 00 30 30 (8h-20h)</p>
+          <p className="text-red-400 text-[10px] mt-2">Ligne gratuite : 200 365 (8h-20h)</p>
         </div>
 
         {/* Security info */}

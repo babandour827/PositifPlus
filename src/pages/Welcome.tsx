@@ -195,7 +195,7 @@ const Welcome: React.FC = () => {
           {/* Emergency line */}
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-400">
-              Besoin d'aide ? Ligne Gindima : <span className="font-semibold text-gray-600">800 00 30 30</span> (gratuit, 8h-20h)
+              Besoin d'aide ? Ligne Gindima : <span className="font-semibold text-gray-600">200 365</span> (gratuit, 8h-20h)
             </p>
           </div>
         </div>

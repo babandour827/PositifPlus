@@ -151,7 +151,7 @@ const FAQ = [
   { q: "Peut-on voyager à l'étranger avec ses médicaments ARV ?", r: "Oui, avec précautions : emportez plus de médicaments que nécessaire, conservez une ordonnance traduite si besoin, transportez les médicaments en bagage cabine. Certains pays imposent des restrictions d'entrée aux PVVIH — vérifiez avant de partir.", category: "Vie quotidienne" },
   { q: "VIH et alcool : quels risques ?", r: "L'alcool en excès affaiblit le système immunitaire, interfère avec l'efficacité des ARV et augmente les effets secondaires hépatiques. Une consommation modérée (1 verre/jour) est généralement tolérée, mais l'abstinence est recommandée.", category: "Vie quotidienne" },
   { q: "Comment gérer la stigmatisation ?", r: "La stigmatisation est réelle et douloureuse, mais elle repose sur l'ignorance. Des associations comme RNP+ et ANCS offrent soutien juridique et psychologique. Il n'y a aucune obligation légale de divulguer votre statut à votre employeur.", category: "Soutien" },
-  { q: "Où trouver du soutien psychologique au Sénégal ?", r: "Les CTA proposent des consultants psychologiques gratuits. L'association ANCS (Alliance Nationale Contre le Sida) offre du soutien. La ligne Gindima 800 00 30 30 est disponible 24h/24 gratuitement et en toute confidentialité.", category: "Soutien" },
+  { q: "Où trouver du soutien psychologique au Sénégal ?", r: "Les CTA proposent des consultants psychologiques gratuits. L'association ANCS (Alliance Nationale Contre le Sida) offre du soutien. La ligne Gindima 200 365 est disponible 24h/24 gratuitement et en toute confidentialité.", category: "Soutien" },
   { q: "Existe-t-il des groupes de parole pour les PVVIH ?", r: "Oui, l'association RNP+ (Réseau National des Personnes Vivant avec le VIH) organise des groupes de parole dans plusieurs villes. SWAA-Sénégal anime des groupes spécifiques pour les femmes. Ces groupes sont confidentiels et gratuits.", category: "Soutien" },
   { q: "Comment aider un proche qui vient d'apprendre son diagnostic ?", r: "Soyez présent sans envahir. Informez-vous sur le VIH pour dépasser vos propres préjugés. Ne divulguez pas son statut. Encouragez-le à consulter un psychologue et à rejoindre un groupe de soutien. Ne prenez pas de décisions médicales à sa place.", category: "Soutien" },
   { q: "La PrEP est-elle disponible au Sénégal ?", r: "Oui. La PrEP est disponible dans plusieurs CTA et centres de santé au Sénégal, notamment à Dakar. Elle est réservée aux personnes séronégatives à haut risque et doit être prescrite et suivie par un médecin.", category: "Prévention" },
@@ -204,7 +204,7 @@ const USEFUL_LINKS = [
 ];
 
 const HOTLINES = [
-  { name: "Ligne Gindima", desc: "Soutien psychologique & orientation CTA", phone: "800 003 030", available: "24h/24 · Gratuit", color: "bg-[#FF6B6B]", badge: "Urgence" },
+  { name: "Ligne Gindima", desc: "Soutien psychologique & orientation CTA", phone: "200 365", available: "24h/24 · Gratuit", color: "bg-[#FF6B6B]", badge: "Urgence" },
   { name: "CNLS — Info VIH", desc: "Informations sur le VIH, prévention, dépistage", phone: "800 00 1717", available: "Lun–Ven 8h–17h · Gratuit", color: "bg-[#10AC84]", badge: "Info" },
   { name: "Sida Info Service", desc: "Écoute et conseils (francophone international)", phone: "+33 800 840 800", available: "24h/24", color: "bg-blue-500", badge: "International" },
   { name: "Stop Sida", desc: "Prévention, dépistage, orientation", phone: "800 00 2020", available: "Lun–Sam 8h–18h · Gratuit", color: "bg-purple-500", badge: "Prévention" },
@@ -490,8 +490,8 @@ export function Resources() {
               <p className="text-xs font-bold text-gray-900">Ligne Gindima — 24h/24 · Gratuit</p>
               <p className="text-xs font-medium text-gray-500">Soutien psychologique & orientation CTA</p>
             </div>
-            <a href="tel:800003030" className="px-3 py-1.5 bg-[#FF6B6B] text-white text-xs font-bold rounded-full shadow-sm">
-              800 003 030
+            <a href="tel:200365" className="px-3 py-1.5 bg-[#FF6B6B] text-white text-xs font-bold rounded-full shadow-sm">
+              200 365
             </a>
           </div>
 

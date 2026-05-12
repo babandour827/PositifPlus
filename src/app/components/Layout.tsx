@@ -61,9 +61,9 @@ export function Layout() {
           <div className="bg-white/20 p-1 rounded-full animate-pulse">
             <Phone className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="font-semibold text-xs tracking-wide">Ligne Gindima · 800 003 030</span>
+          <span className="font-semibold text-xs tracking-wide">Ligne Gindima · 200 365</span>
         </div>
-        <a href="tel:800003030" className="text-white/90 text-[10px] font-bold bg-black/15 px-2 py-0.5 rounded-full">
+        <a href="tel:200365" className="text-white/90 text-[10px] font-bold bg-black/15 px-2 py-0.5 rounded-full">
           Appeler
         </a>
       </div>

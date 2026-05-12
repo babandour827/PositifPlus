@@ -1,4 +1,4 @@
-import { Lock, Send, ArrowLeft, Phone, Bot, Shield, ShieldCheck, Flag, X, Mic, Square, Play, Pause, BarChart3, Plus, Trash2 } from "lucide-react";
+import { Lock, Send, ArrowLeft, Phone, Bot, Shield, ShieldCheck, Flag, X, Mic, Square, Play, Pause, BarChart3, Plus, Trash2, Clock, Timer, Check, CheckCheck } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { supabase } from "../../lib/supabaseClient";
@@ -406,7 +406,7 @@ export default function Chat() {
       const reply = await aiService.sendMessage(history, msg);
       setAiMessages(m => [...m, { role: "assistant" as const, content: reply }]);
     } catch {
-      setAiMessages(m => [...m, { role: "assistant" as const, content: "Désolé, une erreur est survenue. Ligne Gindima : 800 00 30 30." }]);
+      setAiMessages(m => [...m, { role: "assistant" as const, content: "Désolé, une erreur est survenue. Ligne Gindima : 200 365." }]);
     }
     setAiLoading(false);
   }
@@ -546,143 +546,236 @@ export default function Chat() {
   // ── Vue conversation directe ──────────────────────────────────────────────
   if (activeContact && (tab === "soignants" || tab === "patients")) {
     const isDoctor = tab === "soignants";
+
+    // Regroup consecutive messages from the same sender
+    type MsgGroup = { sent: boolean; items: Msg[] };
+    const groups: MsgGroup[] = [];
+    for (const m of msgs) {
+      const last = groups[groups.length - 1];
+      if (last && last.sent === m.sent) last.items.push(m);
+      else groups.push({ sent: m.sent, items: [m] });
+    }
+
     return (
-      <div className="flex flex-col h-full font-sans bg-gray-50">
-        <div className="bg-white px-4 py-3.5 border-b border-gray-100 shadow-sm sticky top-0 z-10">
-          <button onClick={() => { setActiveContact(null); setMsgs([]); if (realtimeRef.current) supabase.removeChannel(realtimeRef.current); }}
-            className="flex items-center gap-1 text-[#10AC84] text-sm font-bold mb-2">
-            <ArrowLeft className="w-4 h-4" /> Retour
-          </button>
+      <div className="flex flex-col h-full font-sans bg-[#F5F7FA]">
+
+        {/* ── Header ── */}
+        <div className="bg-white px-4 pt-4 pb-3 border-b border-gray-100 shadow-sm sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 bg-gradient-to-br ${activeContact.gradient} rounded-full flex items-center justify-center shadow-md shrink-0`}>
-              <span className="text-white font-bold">{activeContact.initials}</span>
+            <button
+              onClick={() => { setActiveContact(null); setMsgs([]); if (realtimeRef.current) supabase.removeChannel(realtimeRef.current); }}
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors shrink-0"
+              aria-label="Retour"
+            >
+              <ArrowLeft className="w-4 h-4 text-gray-600" />
+            </button>
+
+            <div className={`w-11 h-11 bg-gradient-to-br ${activeContact.gradient} rounded-2xl flex items-center justify-center shadow-md shrink-0`}>
+              <span className="text-white font-extrabold text-sm">{activeContact.initials}</span>
             </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-gray-900 text-sm">{activeContact.name}</h3>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-[#1DD1A1]" />
-                <p className="text-[11px] text-gray-500 font-medium">{activeContact.role}</p>
+
+            <div className="flex-1 min-w-0">
+              <h3 className="font-extrabold text-gray-900 text-sm leading-tight truncate">{activeContact.name}</h3>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#1DD1A1] shrink-0" />
+                <p className="text-[11px] text-gray-400 font-medium truncate">{activeContact.role}</p>
               </div>
             </div>
+
             {isDoctor && (
-              <a href="tel:800003030" aria-label="Appeler" className="p-2 bg-gray-100 rounded-full text-gray-500">
-                <Phone className="w-4 h-4" />
+              <a
+                href="tel:200365"
+                aria-label="Appeler"
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors shrink-0"
+              >
+                <Phone className="w-4 h-4 text-gray-500" />
               </a>
             )}
           </div>
+
+          {/* Security strip */}
+          <div className={`mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${isDoctor ? "bg-[#10AC84]/10" : "bg-purple-50"}`}>
+            {isDoctor
+              ? <Lock className="w-3 h-3 text-[#10AC84] shrink-0" />
+              : <ShieldCheck className="w-3 h-3 text-purple-500 shrink-0" />
+            }
+            <span className={`text-[10px] font-bold tracking-wide ${isDoctor ? "text-[#10AC84]" : "text-purple-600"}`}>
+              {isDoctor ? "Conversation chiffrée · Soignant CTA" : "Identité anonyme · Soutien pair-à-pair"}
+            </span>
+          </div>
         </div>
-        <div className={`px-4 py-2 flex items-center gap-2 border-b ${isDoctor ? "bg-emerald-50 border-emerald-100" : "bg-purple-50 border-purple-100"}`}>
-          {isDoctor
-            ? <><Lock className="w-3.5 h-3.5 text-[#10AC84]" /><span className="text-xs font-bold text-[#10AC84]">Messages chiffrés E2E · Soignant CTA</span></>
-            : <><ShieldCheck className="w-3.5 h-3.5 text-purple-500" /><span className="text-xs font-bold text-purple-700">Identité anonyme · Soutien pair-à-pair</span></>
-          }
-        </div>
-        <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 pb-24">
+
+        {/* ── Messages ── */}
+        <div className="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-2 pb-28">
           {loadingMsgs && (
-            <div className="flex justify-center py-8">
-              <div className="w-6 h-6 border-2 border-gray-200 border-t-[#10AC84] rounded-full animate-spin" />
+            <div className="flex justify-center py-10">
+              <div className="w-5 h-5 border-2 border-gray-200 border-t-[#10AC84] rounded-full animate-spin" />
             </div>
           )}
+
           {!loadingMsgs && msgs.length === 0 && (
-            <div className="text-center text-gray-400 py-10 text-sm font-medium">
-              {isDoctor ? `Démarrez la conversation avec ${activeContact.name}` : "Échangez en toute confidentialité..."}
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <div className={`w-14 h-14 bg-gradient-to-br ${activeContact.gradient} rounded-2xl flex items-center justify-center shadow-lg`}>
+                <span className="text-white font-extrabold text-lg">{activeContact.initials}</span>
+              </div>
+              <p className="text-sm font-bold text-gray-700">{activeContact.name}</p>
+              <p className="text-xs text-gray-400 text-center max-w-[200px] leading-relaxed">
+                {isDoctor ? "Démarrez la conversation en toute confidentialité" : "Échangez de façon anonyme et sécurisée"}
+              </p>
             </div>
           )}
-          {msgs.map(m => (
-            <div key={m.id} className={`flex ${m.sent ? "justify-end" : "justify-start"}`}>
-              {!m.sent && (
-                <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${activeContact.gradient} flex items-center justify-center mr-2 shrink-0 self-end`}>
-                  <span className="text-white text-[10px] font-bold">{activeContact.initials}</span>
-                </div>
+
+          {groups.map((group, gi) => (
+            <div key={gi} className={`flex flex-col gap-0.5 ${group.sent ? "items-end" : "items-start"} mb-1`}>
+              {/* Pseudonym label above first received bubble */}
+              {!group.sent && (
+                <span className="text-[10px] font-bold text-gray-400 ml-10 mb-0.5 tracking-wide">
+                  {activeContact.name}
+                </span>
               )}
-              <div
-                onTouchStart={() => startLongPress(m)}
-                onTouchEnd={cancelLongPress}
-                onTouchMove={cancelLongPress}
-                onMouseDown={() => startLongPress(m)}
-                onMouseUp={cancelLongPress}
-                onMouseLeave={cancelLongPress}
-                className={`max-w-[78%] rounded-2xl px-4 py-3 shadow-sm select-none ${m.sent ? "bg-[#10AC84] text-white rounded-br-sm" : "bg-white text-gray-900 rounded-bl-sm border border-gray-100"} ${m.pending ? "opacity-70" : ""}`}>
-                {m.mediaUrl
-                  ? <AudioPlayer url={m.mediaUrl} duration={m.audioDuration} sent={m.sent} />
-                  : <p className="text-sm font-medium leading-relaxed">{m.text}</p>
-                }
-                <div className={`flex items-center gap-1.5 mt-1 ${m.sent ? "justify-end" : "justify-start"}`}>
-                  {m.expiresAt && (
-                    <span className={`text-[10px] font-bold ${m.sent ? "text-white/70" : "text-orange-500"}`}>
-                      🔥 {timeLeft(m.expiresAt)}
-                    </span>
-                  )}
-                  <span className={`text-[10px] ${m.sent ? "text-white/70" : "text-gray-400"}`}>
-                    {m.time}{m.pending ? " · Envoi..." : ""}
-                  </span>
-                  {m.sent && (
-                    <span className={`text-[11px] font-bold leading-none ${
-                      m.pending ? "text-white/40" :
-                      m.isRead  ? "text-white" :
-                                  "text-white/50"
-                    }`}>
-                      {m.pending ? "✓" : "✓✓"}
-                    </span>
-                  )}
-                </div>
-              </div>
+
+              {group.items.map((m, mi) => {
+                const isFirst = mi === 0;
+                const isLast  = mi === group.items.length - 1;
+
+                // Bubble corner shaping per position in group
+                const sentShape  = `rounded-2xl ${isFirst ? "rounded-tr-md" : ""} ${isLast ? "rounded-br-md" : ""} rounded-tl-2xl rounded-bl-2xl`;
+                const recvShape  = `rounded-2xl ${isFirst ? "rounded-tl-md" : ""} ${isLast ? "rounded-bl-md" : ""} rounded-tr-2xl rounded-br-2xl`;
+
+                return (
+                  <div key={m.id} className={`flex items-end gap-2 w-full ${group.sent ? "flex-row-reverse" : "flex-row"}`}>
+                    {/* Avatar — only visible on last bubble of received group */}
+                    {!group.sent && (
+                      <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${activeContact.gradient} flex items-center justify-center shrink-0 shadow-sm transition-opacity ${isLast ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+                        <span className="text-white text-[10px] font-bold">{activeContact.initials}</span>
+                      </div>
+                    )}
+
+                    <div
+                      onTouchStart={() => startLongPress(m)}
+                      onTouchEnd={cancelLongPress}
+                      onTouchMove={cancelLongPress}
+                      onMouseDown={() => startLongPress(m)}
+                      onMouseUp={cancelLongPress}
+                      onMouseLeave={cancelLongPress}
+                      className={`
+                        max-w-[76%] px-4 py-2.5 shadow-sm select-none transition-opacity
+                        ${group.sent
+                          ? `bg-[#10AC84] text-white ${sentShape}`
+                          : `bg-white text-gray-900 border border-gray-100 ${recvShape}`
+                        }
+                        ${m.pending ? "opacity-60" : ""}
+                      `}
+                    >
+                      {m.mediaUrl
+                        ? <AudioPlayer url={m.mediaUrl} duration={m.audioDuration} sent={group.sent} />
+                        : <p className="text-sm font-medium leading-relaxed">{m.text}</p>
+                      }
+
+                      {/* Meta row — only on last bubble of group */}
+                      {isLast && (
+                        <div className={`flex items-center gap-1.5 mt-1.5 ${group.sent ? "justify-end" : "justify-start"}`}>
+                          {m.expiresAt && (
+                            <span className={`flex items-center gap-0.5 text-[9px] font-bold ${group.sent ? "text-white/60" : "text-orange-400"}`}>
+                              <Timer className="w-2.5 h-2.5" />
+                              {timeLeft(m.expiresAt)}
+                            </span>
+                          )}
+                          <span className={`text-[10px] ${group.sent ? "text-white/60" : "text-gray-400"}`}>
+                            {m.time}{m.pending ? " · Envoi..." : ""}
+                          </span>
+                          {group.sent && (
+                            m.pending
+                              ? <Check className="w-3 h-3 text-white/30" />
+                              : m.isRead
+                                ? <CheckCheck className="w-3 h-3 text-white" />
+                                : <CheckCheck className="w-3 h-3 text-white/50" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ))}
           <div ref={endRef} />
         </div>
-        {/* Toggle messages éphémères */}
-        <div className="bg-white border-t border-gray-50 px-4 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          <span className="text-[10px] font-bold text-gray-400 shrink-0">Durée :</span>
+
+        {/* ── Barre durée éphémère ── */}
+        <div className="bg-white border-t border-gray-100 px-4 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          <span className="text-[10px] font-bold text-gray-400 shrink-0 flex items-center gap-1">
+            <Clock className="w-3 h-3" /> Durée :
+          </span>
           {([null, 3600, 86400, 604800] as (number|null)[]).map(d => (
-            <button key={String(d)} onClick={() => setEphemeralDuration(d === ephemeralDuration ? null : d)}
-              className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold transition-all border ${
+            <button
+              key={String(d)}
+              onClick={() => setEphemeralDuration(d === ephemeralDuration ? null : d)}
+              className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-bold transition-all border flex items-center gap-1 ${
                 ephemeralDuration === d && d !== null
                   ? "bg-orange-500 text-white border-orange-500"
                   : d === null
-                  ? ephemeralDuration === null ? "bg-gray-200 text-gray-700 border-gray-200" : "bg-gray-100 text-gray-400 border-gray-100"
+                  ? ephemeralDuration === null
+                    ? "bg-gray-200 text-gray-700 border-gray-200"
+                    : "bg-gray-100 text-gray-400 border-gray-100"
                   : "bg-gray-100 text-gray-500 border-gray-100 hover:bg-orange-50 hover:text-orange-500"
-              }`}>
-              {d === null ? "Normal" : d === 3600 ? "🔥 1h" : d === 86400 ? "🔥 24h" : "🔥 7j"}
+              }`}
+            >
+              {d !== null && <Timer className="w-2.5 h-2.5 shrink-0" />}
+              {d === null ? "Normal" : d === 3600 ? "1h" : d === 86400 ? "24h" : "7j"}
             </button>
           ))}
         </div>
 
-        <div className="bg-white border-t border-gray-100 px-4 py-3 flex gap-3 items-center">
+        {/* ── Zone de saisie ── */}
+        <div className="bg-white border-t border-gray-100 px-4 py-3">
           {isRecording ? (
-            <>
-              <div className="flex-1 bg-rose-50 border border-rose-200 rounded-xl py-3 px-4 flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
-                <span className="text-sm font-bold text-rose-600">Enregistrement...</span>
-                <span className="ml-auto text-sm font-mono font-bold text-rose-500">{formatDuration(recordSecs)}</span>
+            <div className="flex items-center gap-2.5">
+              <div className="flex-1 bg-rose-50 border border-rose-200 rounded-2xl py-3 px-4 flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
+                <span className="text-sm font-bold text-rose-600 flex-1">Enregistrement</span>
+                <span className="text-sm font-mono font-bold text-rose-500">{formatDuration(recordSecs)}</span>
               </div>
-              <button onClick={() => stopRecording(true)}
-                className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
-                <X className="w-5 h-5 text-gray-500" />
+              <button
+                onClick={() => stopRecording(true)}
+                className="w-11 h-11 bg-gray-100 rounded-2xl flex items-center justify-center hover:bg-gray-200 transition-colors shrink-0"
+              >
+                <X className="w-4 h-4 text-gray-500" />
               </button>
-              <button onClick={() => stopRecording(false)}
-                className="w-12 h-12 bg-[#10AC84] rounded-xl flex items-center justify-center shadow-md shadow-[#10AC84]/30">
+              <button
+                onClick={() => stopRecording(false)}
+                className="w-11 h-11 bg-[#10AC84] rounded-2xl flex items-center justify-center shadow-md shadow-[#10AC84]/25 shrink-0"
+              >
                 <Square className="w-4 h-4 text-white fill-white" />
               </button>
-            </>
+            </div>
           ) : (
-            <>
-              <input value={input} onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && sendDirectMsg()}
-                placeholder="Votre message..."
-                className="flex-1 bg-gray-100 text-sm font-medium rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-[#10AC84]/50" />
+            <div className="flex items-center gap-2.5">
+              <div className="flex-1 bg-gray-100 rounded-2xl flex items-center px-4 py-2.5 focus-within:ring-2 focus-within:ring-[#10AC84]/30 transition-all">
+                <input
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && sendDirectMsg()}
+                  placeholder="Votre message..."
+                  className="flex-1 bg-transparent text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none"
+                />
+              </div>
               {input.trim() ? (
-                <button onClick={sendDirectMsg}
-                  className="w-12 h-12 bg-[#10AC84] rounded-xl flex items-center justify-center shadow-md shadow-[#10AC84]/30">
-                  <Send className="w-5 h-5 text-white" />
+                <button
+                  onClick={sendDirectMsg}
+                  className="w-11 h-11 bg-[#10AC84] rounded-2xl flex items-center justify-center shadow-md shadow-[#10AC84]/25 active:scale-95 transition-transform shrink-0"
+                >
+                  <Send className="w-4 h-4 text-white" />
                 </button>
               ) : (
-                <button onClick={startRecording}
-                  className="w-12 h-12 bg-[#10AC84] rounded-xl flex items-center justify-center shadow-md shadow-[#10AC84]/30">
-                  <Mic className="w-5 h-5 text-white" />
+                <button
+                  onClick={startRecording}
+                  className="w-11 h-11 bg-[#10AC84] rounded-2xl flex items-center justify-center shadow-md shadow-[#10AC84]/25 active:scale-95 transition-transform shrink-0"
+                >
+                  <Mic className="w-4 h-4 text-white" />
                 </button>
               )}
-            </>
+            </div>
           )}
         </div>
 
@@ -691,22 +784,20 @@ export default function Chat() {
           <div className="fixed inset-0 z-50 flex items-end" onClick={() => setReportTarget(null)}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full bg-white rounded-t-3xl px-5 pt-5 pb-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Flag className="w-5 h-5 text-rose-500" />
+                  <Flag className="w-4 h-4 text-rose-500" />
                   <h3 className="font-extrabold text-gray-900 text-base">Signaler ce message</h3>
                 </div>
                 <button onClick={() => setReportTarget(null)} aria-label="Fermer" className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                   <X className="w-4 h-4 text-gray-500" />
                 </button>
               </div>
-
-              {/* Aperçu du message */}
               <div className="bg-gray-50 rounded-xl px-4 py-3 mb-4 border border-gray-100">
                 <p className="text-xs text-gray-400 font-bold mb-1">Message signalé :</p>
                 <p className="text-sm text-gray-700 font-medium line-clamp-2">{reportTarget.text}</p>
               </div>
-
               {reportSent ? (
                 <div className="text-center py-4">
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
