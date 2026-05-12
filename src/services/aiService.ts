@@ -2,7 +2,6 @@ const GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.1-8b-instant";
 
-// ── Prompt patient : chaleureux, soutien psychosocial ───────────────────────
 const PATIENT_PROMPT = `Tu es un assistant médical bienveillant pour Positif+, plateforme de soutien aux PVVIH au Sénégal.
 - Réponds uniquement sur le VIH/SIDA, ARV, santé, bien-être et soutien psychologique.
 - Pour urgences : ligne Gindima 200 365 (gratuit 24h/24).
@@ -12,7 +11,6 @@ const PATIENT_PROMPT = `Tu es un assistant médical bienveillant pour Positif+, 
 - Réponds en français, wolof ou anglais selon l'utilisateur.
 CTA au Sénégal : Hôpital de Fann (Dakar), Hôpital Principal (Dakar), Hôpital de Ziguinchor, Hôpital de Kaolack, CTA Saint-Louis. Site CNLS : www.cnls.sn`;
 
-// ── Prompt soignant : expert e-Health / algorithme PDV ──────────────────────
 const SOIGNANT_PROMPT = `Tu es un expert en santé numérique (e-Health) et en Data Science, spécialisé dans la lutte contre le VIH en Afrique de l'Ouest. Tu accompagnes le projet "Positif+", un pont numérique pour réduire les Perdus de Vue (PDV) au Sénégal, dans un contexte de forte stigmatisation (réf. Affaire Pape Cheikh Diallo).
 
 DONNÉES ÉPIDÉMIOLOGIQUES RÉELLES — CNLS Sénégal 2023 :
@@ -68,7 +66,7 @@ async function callLLM(systemPrompt: string, history: ChatMessage[], userMessage
   }
   const messages: ChatMessage[] = [
     { role: "system", content: systemPrompt },
-    ...history.slice(-10), // garde les 10 derniers messages pour pas dépasser le contexte
+    ...history.slice(-10),
     { role: "user", content: userMessage },
   ];
   try {
@@ -86,12 +84,10 @@ async function callLLM(systemPrompt: string, history: ChatMessage[], userMessage
 }
 
 export const aiService = {
-  /** Envoi d'un message selon le rôle de l'utilisateur */
   async sendMessage(history: ChatMessage[], userMessage: string, isSoignant = false): Promise<string> {
     return callLLM(isSoignant ? SOIGNANT_PROMPT : PATIENT_PROMPT, history, userMessage);
   },
 
-  /** Alias générique (rétro-compatibilité) */
   generate: async function (params: { inputs?: string; messages?: ChatMessage[]; parameters?: { max_new_tokens?: number } }): Promise<string> {
     const msg = params.inputs || params.messages?.findLast(m => m.role === "user")?.content || "";
     const hist = params.messages?.filter(m => m.role !== "system") || [];

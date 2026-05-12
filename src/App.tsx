@@ -15,7 +15,6 @@ import { supabase } from "./lib/supabaseClient";
 import { huggingFaceService } from "./services/huggingFaceService";
 import logo from "./assets/positif_plus_logo.png";
 
-// ─── DESIGN TOKENS (Figma exact) ────────────────────────────
 const C = {
   bg:        "#FFFFFF",
   bgSoft:    "#F9FAFB",
@@ -51,12 +50,10 @@ const C = {
   gindima2:  "#F97316",
 };
 
-// ─── TYPES ─────────────────────────────────────────────────
 type Tab = "accueil"|"communaute"|"messagerie"|"tracking"|"ressources"|"profil"|"notifications"|"ia";
 interface Group { id:string; name:string; description:string; category:string; member_count:number; }
 interface ChatMsg { role:"user"|"assistant"; content:string; }
 
-// ─── DONNÉES ───────────────────────────────────────────────
 const CAT: Record<string,{icon:typeof Globe;color:string;bg:string;label:string}> = {
   general:   {icon:Globe,      color:C.green,  bg:C.greenBg,  label:"Général"},
   traitement:{icon:Pill,       color:C.blue,   bg:C.blueBg,   label:"Traitement"},
@@ -65,7 +62,6 @@ const CAT: Record<string,{icon:typeof Globe;color:string;bg:string;label:string}
   jeunes:    {icon:Star,       color:C.coral,  bg:C.coralBg,  label:"Jeunes"},
 };
 
-// ─── HELPERS ───────────────────────────────────────────────
 const card: React.CSSProperties = {
   background: C.bg,
   border: `1px solid ${C.border}`,
@@ -78,7 +74,6 @@ const inp: React.CSSProperties = {
   color:C.text, fontSize:14, outline:"none", boxSizing:"border-box",
 };
 
-// ─── SPLASH ────────────────────────────────────────────────
 function Splash({onDone}:{onDone:()=>void}) {
   useEffect(()=>{const t=setTimeout(onDone,2400);return()=>clearTimeout(t);},[]);
   return (
@@ -98,7 +93,6 @@ function Splash({onDone}:{onDone:()=>void}) {
   );
 }
 
-// ─── GINDIMA BANNER ────────────────────────────────────────
 function GindimaBanner() {
   return (
     <div style={{background:`linear-gradient(135deg,${C.gindima1},${C.gindima2})`,padding:"12px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -111,7 +105,6 @@ function GindimaBanner() {
   );
 }
 
-// ─── P+ HEADER ─────────────────────────────────────────────
 function AppHeader({onNotif,notifCount=0}:{onNotif:()=>void;notifCount?:number}) {
   return (
     <div style={{background:C.bg,padding:"14px 20px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:`1px solid ${C.border}`}}>
@@ -132,7 +125,6 @@ function AppHeader({onNotif,notifCount=0}:{onNotif:()=>void;notifCount?:number})
   );
 }
 
-// ─── AUTH ──────────────────────────────────────────────────
 function Auth({onAuth}:{onAuth:()=>void}) {
   const [mode,setMode]=useState<"login"|"register">("login");
   const [email,setEmail]=useState(""); const [password,setPassword]=useState("");
@@ -179,7 +171,6 @@ function Auth({onAuth}:{onAuth:()=>void}) {
   );
 }
 
-// ─── ACCUEIL ───────────────────────────────────────────────
 function PageAccueil({onNav}:{onNav:(t:Tab)=>void}) {
   const actions=[
     {label:"Communauté",sub:"Groupes pair-à-pair",icon:Users,color:C.orange,bg:C.orangeBg,tab:"communaute" as Tab},
@@ -202,7 +193,6 @@ function PageAccueil({onNav}:{onNav:(t:Tab)=>void}) {
             <div style={{position:"absolute",top:8,right:8,width:8,height:8,borderRadius:"50%",background:C.coral}}/>
           </button>
         </div>
-        {/* Stats cards */}
         <div style={{display:"flex",gap:10}}>
           {[
             {label:"Membres",value:"2 847",color:C.green,bg:C.greenBg},
@@ -217,7 +207,6 @@ function PageAccueil({onNav}:{onNav:(t:Tab)=>void}) {
         </div>
       </div>
 
-      {/* Urgence banner */}
       <div style={{padding:"12px 16px"}}>
         <div style={{background:`linear-gradient(135deg,${C.gindima1},${C.gindima2})`,borderRadius:18,padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
@@ -231,7 +220,6 @@ function PageAccueil({onNav}:{onNav:(t:Tab)=>void}) {
         </div>
       </div>
 
-      {/* Accès rapide */}
       <div style={{padding:"4px 16px 24px"}}>
         <h3 style={{color:C.textMid,fontSize:13,fontWeight:700,letterSpacing:.5,marginBottom:14}}>ACCÈS RAPIDE</h3>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
@@ -248,7 +236,6 @@ function PageAccueil({onNav}:{onNav:(t:Tab)=>void}) {
   );
 }
 
-// ─── COMMUNAUTÉ ────────────────────────────────────────────
 function PageCommunaute() {
   const [groups,setGroups]=useState<Group[]>([]); const [activeGroup,setActiveGroup]=useState<Group|null>(null);
   const [posts,setPosts]=useState<any[]>([]); const [newPost,setNewPost]=useState("");
@@ -337,7 +324,6 @@ function PageCommunaute() {
   );
 }
 
-// ─── MESSAGERIE ────────────────────────────────────────────
 function PageMessagerie() {
   const [activeChat,setActiveChat]=useState<any>(null);
   const [msgs,setMsgs]=useState<{text:string;mine:boolean;time:string}[]>([]);
@@ -404,7 +390,6 @@ function PageMessagerie() {
   );
 }
 
-// ─── TRACKING ──────────────────────────────────────────────
 function PageTracking() {
   const [humeur,setHumeur]=useState<string|null>(null);
   const programme=[
@@ -424,7 +409,6 @@ function PageTracking() {
         <p style={{color:C.textSub,fontSize:13,margin:0}}>L'observance est la clé de la réussite.</p>
       </div>
       <div style={{padding:"16px"}}>
-        {/* Score cards */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
           <div style={{background:`linear-gradient(135deg,${C.green},${C.greenDark})`,borderRadius:18,padding:"20px 18px",boxShadow:`0 4px 20px ${C.green}40`}}>
             <div style={{color:"rgba(255,255,255,.8)",fontSize:11,fontWeight:700,letterSpacing:1,marginBottom:8}}>SCORE</div>
@@ -438,7 +422,6 @@ function PageTracking() {
           </div>
         </div>
 
-        {/* Programme du jour */}
         <div style={{...card,padding:20,marginBottom:16}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
             <h3 style={{color:C.text,fontSize:16,fontWeight:700,margin:0}}>Programme du jour</h3>
@@ -460,7 +443,6 @@ function PageTracking() {
           </div>
         </div>
 
-        {/* Semaine */}
         <div style={{...card,padding:20,marginBottom:16}}>
           <h3 style={{color:C.text,fontSize:15,fontWeight:700,margin:"0 0 14px"}}>Cette semaine</h3>
           <div style={{display:"flex",gap:8}}>
@@ -475,7 +457,6 @@ function PageTracking() {
           </div>
         </div>
 
-        {/* Humeur */}
         <div style={{...card,padding:20}}>
           <h3 style={{color:C.text,fontSize:15,fontWeight:700,margin:"0 0 14px"}}>Comment vous sentez-vous ?</h3>
           <div style={{display:"flex",gap:10}}>
@@ -493,7 +474,6 @@ function PageTracking() {
   );
 }
 
-// ─── RESSOURCES ────────────────────────────────────────────
 function PageRessources() {
   const [search,setSearch]=useState("");
   const categories=[
@@ -519,7 +499,6 @@ function PageRessources() {
         </div>
       </div>
       <div style={{padding:16}}>
-        {/* Catégories */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
           {categories.map(c=>(
             <button key={c.label} style={{...card,padding:"14px 16px",textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",border:`1px solid ${C.border}`}}>
@@ -532,7 +511,6 @@ function PageRessources() {
           ))}
         </div>
 
-        {/* Quiz card */}
         <div style={{background:C.purpleBg,border:`1px solid ${C.purpleBorder}`,borderRadius:18,padding:20,marginBottom:16,display:"flex",alignItems:"center",gap:16}}>
           <div style={{width:52,height:52,borderRadius:14,background:C.purple+"22",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Star size={26} color={C.purple} fill={C.purple}/></div>
           <div style={{flex:1}}>
@@ -542,7 +520,6 @@ function PageRessources() {
           </div>
         </div>
 
-        {/* Centres CTA */}
         <h3 style={{color:C.textMid,fontSize:13,fontWeight:700,letterSpacing:.5,marginBottom:12}}>CENTRES DE TRAITEMENT (CTA)</h3>
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
           {ctas.map((c,i)=>(
@@ -562,7 +539,6 @@ function PageRessources() {
   );
 }
 
-// ─── NOTIFICATIONS ─────────────────────────────────────────
 function PageNotifications({onBack}:{onBack:()=>void}) {
   const [notifs,setNotifs]=useState([
     {id:1,titre:"Rappel ARV — 08h00",body:"Il est l'heure de prendre votre TDF/3TC/EFV 300mg.",time:"Il y a 5 min",lu:false,color:C.orange,icon:Pill},
@@ -599,7 +575,6 @@ function PageNotifications({onBack}:{onBack:()=>void}) {
   );
 }
 
-// ─── ASSISTANT IA ──────────────────────────────────────────
 function PageIA({onBack}:{onBack:()=>void}) {
   const [messages,setMessages]=useState<ChatMsg[]>([{role:"assistant",content:"Bonjour ! Je suis l'assistant médical de Positif+, spécialisé VIH/Sénégal. Je peux répondre à vos questions sur les traitements ARV, les CTA, la nutrition et le soutien psychologique."}]);
   const [input,setInput]=useState(""); const [loading,setLoading]=useState(false);
@@ -643,7 +618,6 @@ function PageIA({onBack}:{onBack:()=>void}) {
   );
 }
 
-// ─── PROFIL ────────────────────────────────────────────────
 function PageProfil() {
   const [user,setUser]=useState<any>(null);
   useEffect(()=>{supabase.auth.getUser().then(({data})=>setUser(data.user));},[]);
@@ -662,7 +636,6 @@ function PageProfil() {
         <div style={{display:"flex",justifyContent:"flex-end",marginBottom:16}}>
           <button style={{width:38,height:38,borderRadius:10,background:C.bgGray,border:"none",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}><Settings size={18} color={C.textSub}/></button>
         </div>
-        {/* Avatar section */}
         <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:16}}>
           <div style={{width:72,height:72,borderRadius:"50%",border:`3px solid ${C.orange}`,background:C.orangeBg,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <span style={{color:C.orange,fontSize:22,fontWeight:800}}>SM</span>
@@ -676,7 +649,6 @@ function PageProfil() {
             </div>
           </div>
         </div>
-        {/* Confidentialité card */}
         <div style={{background:C.greenBg,border:`1px solid ${C.greenBorder}`,borderRadius:16,padding:"14px 16px",display:"flex",alignItems:"flex-start",gap:12}}>
           <Shield size={20} color={C.green} style={{flexShrink:0,marginTop:1}}/>
           <div>
@@ -685,7 +657,6 @@ function PageProfil() {
           </div>
         </div>
       </div>
-      {/* Menu items */}
       <div style={{padding:"16px 16px 0"}}>
         <div style={{...card,overflow:"hidden",marginBottom:16}}>
           {menuItems.map((item,i)=>(
@@ -696,14 +667,12 @@ function PageProfil() {
             </div>
           ))}
         </div>
-        {/* Déconnexion */}
         <div style={{...card,overflow:"hidden",marginBottom:20}}>
           <button onClick={()=>supabase.auth.signOut()} style={{width:"100%",padding:"16px 18px",display:"flex",alignItems:"center",justifyContent:"center",gap:10,border:"none",background:C.bg,cursor:"pointer"}}>
             <LogIn size={18} color={C.coral}/>
             <span style={{color:C.coral,fontSize:14,fontWeight:700}}>Se déconnecter</span>
           </button>
         </div>
-        {/* Footer */}
         <div style={{textAlign:"center",paddingTop:8}}>
           <div style={{width:40,height:40,borderRadius:12,background:C.bgGray,border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px"}}><Plus size={20} color={C.textLight}/></div>
           <p style={{color:C.textLight,fontSize:11,letterSpacing:1,fontWeight:600,margin:0}}>ENSEMBLE, ON EST PLUS FORTS</p>
@@ -714,7 +683,6 @@ function PageProfil() {
   );
 }
 
-// ─── NAV BAR (Figma style) ──────────────────────────────────
 function NavBar({active,onNav}:{active:Tab;onNav:(t:Tab)=>void}) {
   const tabs=[
     {key:"accueil" as Tab,label:"Accueil",icon:Home},
@@ -746,7 +714,6 @@ function NavBar({active,onNav}:{active:Tab;onNav:(t:Tab)=>void}) {
   );
 }
 
-// ─── APP ───────────────────────────────────────────────────
 export default function App() {
   const [phase,setPhase]=useState<"splash"|"auth"|"app">("splash");
   const [tab,setTab]=useState<Tab>("accueil");

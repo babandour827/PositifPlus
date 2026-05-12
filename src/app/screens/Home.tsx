@@ -110,7 +110,6 @@ export function Home() {
       ]);
       setPdvStats({ patients: patients ?? 0, soignants: soignants ?? 0, posts: posts ?? 0 });
 
-      // Patients à risque — chargé uniquement pour les soignants
       if (isSoignant) {
         const { data: allPatients } = await supabase
           .from("profiles").select("id, pseudo").eq("is_soignant", false).limit(40);
@@ -144,7 +143,6 @@ export function Home() {
 
   const nextArv = getNextArvTime(meds);
 
-  // ── VUE SOIGNANT ─────────────────────────────────────────────────────────
   if (isSoignant) {
     return (
       <div className="flex flex-col gap-5 p-5 min-h-full font-sans pb-24 bg-gray-50/50">

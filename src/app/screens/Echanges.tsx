@@ -27,13 +27,10 @@ export function Echanges() {
   const [patientTab, setPatientTab] = useState<PatientTab>("forum");
   const [soignantTab, setSoignantTab] = useState<SoignantTab>("patients");
 
-  /* ── VUE SOIGNANT ──────────────────────────────────────────────────────── */
   if (isSoignant) {
     return (
       <div className="flex flex-col h-full font-sans bg-gray-50">
-        {/* Tab switcher soignant */}
         <div className="bg-white px-4 pt-3 pb-3 border-b border-gray-100 shadow-sm shrink-0 sticky top-0 z-20">
-          {/* Badge rôle */}
           <div className="flex items-center gap-2 mb-2.5">
             <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-wider">
               Interface Soignant
@@ -59,7 +56,6 @@ export function Echanges() {
           </div>
         </div>
 
-        {/* Contenu */}
         <div className="flex-1 overflow-y-auto">
           {soignantTab === "patients"  && (
             <SoignantPatients soignantCta={profile?.cta_id ?? "CTA Sénégal"} />
@@ -72,7 +68,6 @@ export function Echanges() {
     );
   }
 
-  /* ── VUE PATIENT ───────────────────────────────────────────────────────── */
   return (
     <div className="flex flex-col h-full font-sans bg-gray-50">
       <div className="bg-white px-4 pt-3 pb-3 border-b border-gray-100 shadow-sm shrink-0 sticky top-0 z-20">

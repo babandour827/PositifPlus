@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { aiService } from "../../services/aiService";
 import { useProfile } from "../../hooks/useProfile";
 
-// ── Suggestions selon le rôle ────────────────────────────────────────────────
 const PATIENT_SUGGESTIONS = [
   "Effets secondaires ARV", "Trouver un CTA", "Observance traitement",
   "Nutrition et VIH", "Soutien psychologique",
@@ -29,7 +28,6 @@ export function AIAssistant() {
   const [loading, setLoading] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
-  // Recharger le message d'accueil dès que le profil est connu
   useEffect(() => {
     if (!profileLoading) {
       setMessages([{
@@ -64,7 +62,6 @@ export function AIAssistant() {
 
   const suggestions = isSoignant ? SOIGNANT_SUGGESTIONS : PATIENT_SUGGESTIONS;
 
-  // ── Couleurs selon le rôle ──
   const accent = isSoignant ? "bg-blue-500" : "bg-purple-600";
   const accentLight = isSoignant ? "bg-blue-50" : "bg-purple-100";
   const accentText = isSoignant ? "text-blue-600" : "text-purple-600";
@@ -74,7 +71,6 @@ export function AIAssistant() {
   return (
     <div className="flex flex-col h-full font-sans bg-gray-50">
 
-      {/* ── Header ── */}
       <div className="bg-white px-5 py-4 border-b border-gray-100 shadow-sm sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <div className={`w-11 h-11 rounded-2xl ${accentLight} flex items-center justify-center shadow-sm`}>
@@ -96,7 +92,6 @@ export function AIAssistant() {
               </span>
             </div>
           </div>
-          {/* Badge rôle */}
           {isSoignant && (
             <span className="flex items-center gap-1 text-[10px] font-black text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
               <Stethoscope className="w-3 h-3" /> Expert
@@ -104,7 +99,6 @@ export function AIAssistant() {
           )}
         </div>
 
-        {/* Bandeau soignant */}
         {isSoignant && (
           <div className="mt-3 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-blue-500 shrink-0" />
@@ -115,7 +109,6 @@ export function AIAssistant() {
         )}
       </div>
 
-      {/* ── Messages ── */}
       <div className="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-4 pb-32">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} gap-2 items-end`}>
@@ -136,7 +129,6 @@ export function AIAssistant() {
           </div>
         ))}
 
-        {/* Typing indicator */}
         {loading && (
           <div className="flex gap-2 items-end">
             <div className={`w-8 h-8 rounded-full ${accentLight} flex items-center justify-center shrink-0`}>
@@ -157,7 +149,6 @@ export function AIAssistant() {
         <div ref={endRef} />
       </div>
 
-      {/* ── Suggestions rapides ── */}
       {messages.length < 3 && (
         <div className="px-4 pb-2 flex gap-2 flex-wrap">
           {suggestions.map(s => (
@@ -169,7 +160,6 @@ export function AIAssistant() {
         </div>
       )}
 
-      {/* ── Bandeau urgence ── */}
       <div className="px-4 pb-2">
         <div className={`rounded-xl p-2.5 flex items-center gap-2 ${isSoignant ? "bg-blue-50 border border-blue-100" : "bg-rose-50 border border-rose-100"}`}>
           {isSoignant
@@ -183,7 +173,6 @@ export function AIAssistant() {
         </div>
       </div>
 
-      {/* ── Input ── */}
       <div className="bg-white border-t border-gray-100 px-4 py-3 flex gap-3">
         <input
           value={input}

@@ -29,3 +29,5 @@ dist-ssr
 .agents/
 capture_screens.py
 capture_chat.py
+skills-lock.json
+guidelines/
