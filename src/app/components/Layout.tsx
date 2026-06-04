@@ -187,7 +187,7 @@ function SoignantNav() {
         <SoignantNavItem to="/app/echanges" icon={UserRound} label="Patients" />
         <div className="relative -top-6">
           <NavLink
-            to="/app/echanges"
+            to="/app/agenda"
             className={({ isActive }) => cn(
               "flex flex-col items-center justify-center w-14 h-14 rounded-full shadow-lg shadow-blue-400/30 transition-all duration-300 border-4 border-gray-50",
               isActive ? "bg-blue-700 scale-110" : "bg-blue-600 hover:scale-105"
