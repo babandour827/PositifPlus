@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { supabase } from "../../lib/supabaseClient";
 import { Logo } from "../components/Logo";
-import { Eye, EyeOff, Shield, Stethoscope, Users, CheckCircle2, ChevronRight } from "lucide-react";
+import { Eye, EyeOff, Shield, Stethoscope, Users, CheckCircle2, ChevronRight, AlertTriangle } from "lucide-react";
 import i18n from "../../i18n/i18n";
 
 const LANGS = [
@@ -58,6 +58,10 @@ export function Auth() {
   const [specialite, setSpecialite] = useState("");
   const [cta, setCta] = useState("");
   const [phone, setPhone] = useState("");
+  const [soignantId, setSoignantId] = useState("");
+  const [soignantsList, setSoignantsList] = useState<{ id: string; pseudo: string; specialite: string | null; cta_id: string | null }[]>([]);
+  const [soignantsLoading, setSoignantsLoading] = useState(false);
+  const [soignantsLoaded, setSoignantsLoaded] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -73,7 +77,21 @@ export function Auth() {
 
   function resetRegister() {
     setRole(null); setPseudo(""); setNomPro(""); setSpecialite(""); setCta(""); setPhone("");
+    setSoignantId(""); setSoignantsList([]); setSoignantsLoaded(false);
     setEmail(""); setPassword(""); setError("");
+  }
+
+  async function loadSoignants() {
+    setSoignantsLoading(true);
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, pseudo, specialite, cta_id")
+      .eq("is_soignant", true)
+      .eq("is_verified", true)
+      .order("pseudo");
+    setSoignantsList(data || []);
+    setSoignantsLoading(false);
+    setSoignantsLoaded(true);
   }
 
   async function handleLogin() {
@@ -108,6 +126,7 @@ export function Auth() {
         specialite: role === "soignant" ? specialite : null,
         cta_id: role === "soignant" ? cta : null,
         contact_phone: phone.trim() || null,
+        soignant_id: role === "patient" && soignantId ? soignantId : null,
       });
     }
     setLoading(false);
@@ -184,7 +203,7 @@ export function Auth() {
               <div className="grid grid-cols-2 gap-3">
                 {/* Patient */}
                 <button
-                  onClick={() => setRole("patient")}
+                  onClick={() => { setRole("patient"); loadSoignants(); }}
                   className={`relative flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 transition-all duration-200 text-left ${
                     role === "patient"
                       ? "border-[#10AC84] bg-emerald-50 shadow-md shadow-[#10AC84]/10"
@@ -247,6 +266,35 @@ export function Auth() {
                   className={inp} autoComplete="off" maxLength={30}
                 />
                 <p className="text-[10px] text-gray-400 -mt-2">{pseudo.length}/30 caractères · min. 2</p>
+                <select
+                  value={soignantId}
+                  onChange={e => setSoignantId(e.target.value)}
+                  disabled={soignantsLoading}
+                  className={inp + " appearance-none"}
+                >
+                  <option value="">
+                    {soignantsLoading
+                      ? "Chargement des soignants…"
+                      : soignantsLoaded && soignantsList.length === 0
+                        ? "Aucun soignant disponible pour l'instant"
+                        : "Mon médecin / soignant référent… (optionnel)"}
+                  </option>
+                  {soignantsList.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.pseudo}{s.specialite ? ` — ${s.specialite}` : ""}{s.cta_id ? ` · ${s.cta_id}` : ""}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Avertissement si soignants disponibles mais aucun sélectionné */}
+                {soignantsLoaded && soignantsList.length > 0 && !soignantId && (
+                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5 -mt-1">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-[10px] font-bold text-amber-800 leading-snug">
+                      Choisir un soignant permet un suivi personnalisé. Vous pourrez le modifier dans votre profil.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

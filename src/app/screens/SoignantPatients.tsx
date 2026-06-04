@@ -15,6 +15,7 @@ import { useNavigate } from "react-router";
 type Patient = {
   id: string;
   pseudo: string;
+  specialite?: string;
   cta_id?: string;
   region?: string;
   last_mood?: string;
@@ -81,24 +82,31 @@ function getRiskLevel(score: number): RiskLevel {
 /* ═══════════════════════════════════════════════════════════════════════════
    MODAL RDV
 ═══════════════════════════════════════════════════════════════════════════ */
-function RdvModal({ patient, onClose, soignantCta }: {
-  patient: Patient; onClose: () => void; soignantCta: string;
+function RdvModal({ patient, onClose, soignantCta, soignantId }: {
+  patient: Patient; onClose: () => void; soignantCta: string; soignantId: string;
 }) {
   const [date, setDate]     = useState("");
   const [time, setTime]     = useState("09:00");
+  const [notes, setNotes]   = useState("");
   const [saving, setSaving] = useState(false);
   const [done, setDone]     = useState(false);
+  const [error, setError]   = useState("");
   const inp = "w-full bg-gray-100 text-sm font-medium rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-400/30";
 
   async function save() {
     if (!date) return;
     setSaving(true);
-    await supabase.from("appointments").insert({
-      patient_id: patient.id,
+    setError("");
+    const { error: err } = await supabase.from("appointments").insert({
+      patient_id:       patient.id,
+      soignant_id:      soignantId,
       appointment_date: new Date(`${date}T${time}:00`).toISOString(),
-      cta_name: soignantCta || "CTA Sénégal",
-    }).catch(() => {});
+      cta_name:         soignantCta || "CTA Sénégal",
+      status:           "confirme",
+      notes:            notes.trim() || null,
+    });
     setSaving(false);
+    if (err) { setError("Erreur lors de l'enregistrement. Réessayez."); return; }
     setDone(true);
     setTimeout(onClose, 1400);
   }
@@ -144,10 +152,18 @@ function RdvModal({ patient, onClose, soignantCta }: {
             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Heure</label>
             <input type="time" value={time} onChange={e => setTime(e.target.value)} className={inp} />
           </div>
+          <div>
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Notes (optionnel)</label>
+            <input value={notes} onChange={e => setNotes(e.target.value)}
+              placeholder="Ex : bilan CD4, renouvellement ARV…" className={inp} />
+          </div>
+          {error && (
+            <p className="text-xs text-rose-600 font-medium bg-rose-50 px-3 py-2 rounded-lg">{error}</p>
+          )}
           <button onClick={save} disabled={!date || saving || done}
             className="w-full mt-1 py-3.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2 disabled:opacity-50"
             style={{ background: done ? "#10AC84" : "linear-gradient(135deg,#1565C0,#1976D2)" }}>
-            {done ? <><CheckCircle2 className="w-4 h-4" /> RDV confirmé — patient notifié</> :
+            {done ? <><CheckCircle2 className="w-4 h-4" /> RDV planifié</> :
              saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Enregistrement...</> :
              <><Calendar className="w-4 h-4" /> Confirmer le rendez-vous</>}
           </button>
@@ -315,6 +331,7 @@ export function SoignantPatients({ soignantCta }: { soignantCta: string }) {
   const [search, setSearch]         = useState("");
   const [filter, setFilter]         = useState<"all" | "difficile" | "inactif" | "critique">("all");
   const [rdvPatient, setRdvPatient] = useState<Patient | null>(null);
+  const [soignantUserId, setSoignantUserId] = useState<string | null>(null);
 
   // Rapport IA global
   const [rapport, setRapport]         = useState<string | null>(null);
@@ -323,10 +340,14 @@ export function SoignantPatients({ soignantCta }: { soignantCta: string }) {
 
   useEffect(() => {
     async function load() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
+      setSoignantUserId(user.id);
+
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, pseudo, cta_id, region")
-        .eq("is_soignant", false)
+        .select("id, pseudo, specialite, cta_id, region")
+        .eq("soignant_id", user.id)
         .order("pseudo")
         .limit(60);
 
@@ -508,16 +529,19 @@ Rédige un rapport de synthèse en 4 phrases maximum avec 3 actions prioritaires
             key={patient.id}
             patient={patient}
             onRdv={p => setRdvPatient(p)}
-            onContact={() => navigate("/app/echanges")}
+            onContact={(p) => navigate("/app/echanges", {
+              state: { openContact: { id: p.id, pseudo: p.pseudo, specialite: p.specialite ?? null, cta_id: p.cta_id } }
+            })}
           />
         ))}
       </div>
 
-      {rdvPatient && (
+      {rdvPatient && soignantUserId && (
         <RdvModal
           patient={rdvPatient}
           onClose={() => setRdvPatient(null)}
           soignantCta={soignantCta}
+          soignantId={soignantUserId}
         />
       )}
 

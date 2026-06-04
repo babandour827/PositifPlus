@@ -1,6 +1,6 @@
 import { Lock, Send, ArrowLeft, Phone, Bot, Shield, ShieldCheck, Flag, X, Mic, Square, Play, Pause, BarChart3, Plus, Trash2, Clock, Timer, Check, CheckCheck } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { supabase } from "../../lib/supabaseClient";
 import { aiService } from "../../services/aiService";
 
@@ -176,6 +176,7 @@ function PollCard({ poll, myVote, onVote, isMine }: {
 
 export default function Chat() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [tab, setTab] = useState<Tab>("soignants");
   const [activeContact, setActiveContact] = useState<Contact | null>(null);
   const [activeGroup, setActiveGroup] = useState<any>(null);
@@ -219,6 +220,8 @@ export default function Chat() {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, groupPosts, aiMessages]);
 
+  const pendingContactRef = useRef<any>(location.state?.openContact ?? null);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const uid = data.user?.id ?? null;
@@ -242,6 +245,16 @@ export default function Chat() {
 
     return () => { if (realtimeRef.current) supabase.removeChannel(realtimeRef.current); };
   }, []);
+
+  // Ouvrir le contact en attente dès que userId est disponible (depuis bouton Contact soignant)
+  useEffect(() => {
+    if (userId && pendingContactRef.current) {
+      const pending = pendingContactRef.current;
+      pendingContactRef.current = null;
+      setTab("patients");
+      openContact(profileToContact(pending));
+    }
+  }, [userId]);
 
   // Nettoyage client des messages expirés toutes les 10s
   useEffect(() => {

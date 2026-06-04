@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router";
 import { Users, MessageCircle, Bot, UserRound } from "lucide-react";
 import { Community } from "./Community";
 import Chat from "./Chat";
@@ -24,8 +25,16 @@ const SOIGNANT_TABS: { key: SoignantTab; label: string; icon: React.ElementType 
 
 export function Echanges() {
   const { isSoignant, profile } = useProfile();
+  const location = useLocation();
   const [patientTab, setPatientTab] = useState<PatientTab>("forum");
   const [soignantTab, setSoignantTab] = useState<SoignantTab>("patients");
+
+  // Si on arrive depuis le bouton Contact d'un patient, ouvrir l'onglet Messages
+  useEffect(() => {
+    if (location.state?.openContact && isSoignant) {
+      setSoignantTab("messages");
+    }
+  }, [location.state, isSoignant]);
 
   if (isSoignant) {
     return (

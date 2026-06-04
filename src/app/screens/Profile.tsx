@@ -1127,9 +1127,12 @@ export function Profile() {
         setMeds(d || []);
       });
 
-      supabase.from("appointments").select("*").eq("patient_id", uid).order("appointment_date", { ascending: true }).then(({ data: a }) => {
-        setRdvList(a || []);
-      });
+      supabase.from("appointments")
+        .select("*, soignant:soignant_id(id, pseudo, specialite)")
+        .eq("patient_id", uid)
+        .gte("appointment_date", new Date().toISOString())
+        .order("appointment_date", { ascending: true })
+        .then(({ data: a }) => { setRdvList(a || []); });
     });
   }, []);
 
@@ -1152,21 +1155,25 @@ export function Profile() {
 
   async function addRDV() {
     if (!newRDV.appointment_date || !user) return;
-    const soignantId = newRDV.soignant_id || user.id;
     const { data } = await supabase
       .from("appointments")
       .insert({
-        patient_id: user.id,
-        soignant_id: soignantId,
+        patient_id:       user.id,
+        soignant_id:      profile?.soignant_id ?? null,
         appointment_date: new Date(newRDV.appointment_date).toISOString(),
-        cta_name: newRDV.cta_name || "CTA à définir",
-        status: "pending",
+        cta_name:         newRDV.cta_name || "CTA à définir",
+        status:           "planifie",
       })
-      .select()
+      .select("*, soignant:soignant_id(id, pseudo, specialite)")
       .single();
     if (data) setRdvList(r => [...r, data]);
     setShowAddRDV(false);
     setNewRDV({ soignant_id: "", appointment_date: "", cta_name: "" });
+  }
+
+  async function cancelRDV(id: string) {
+    await supabase.from("appointments").update({ status: "annule" }).eq("id", id);
+    setRdvList(r => r.filter(rdv => rdv.id !== id));
   }
 
   async function handleLogout() {
@@ -1368,28 +1375,45 @@ export function Profile() {
             {rdvList.map((r, i) => (
               <div key={r.id || i} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
                 <div className="flex justify-between items-start mb-3">
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-bold text-sm text-gray-900">{r.cta_name || "CTA"}</p>
-                    <p className="text-xs text-gray-500 font-medium">
-                      {r.soignant_id ? `Soignant ID: ${r.soignant_id.slice(0, 8)}...` : "Soignant à confirmer"}
+                    <p className="text-xs text-gray-500 font-medium mt-0.5">
+                      {r.soignant?.pseudo
+                        ? `${r.soignant.pseudo}${r.soignant.specialite ? ` · ${r.soignant.specialite}` : ""}`
+                        : "Soignant à confirmer"}
                     </p>
+                    {r.notes && <p className="text-xs text-gray-400 mt-1 italic">{r.notes}</p>}
                   </div>
-                  <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${r.status === "confirmed" ? "bg-emerald-50 text-[#10AC84]" : "bg-orange-50 text-[#FF9F43]"}`}>
-                    {r.status === "confirmed" ? "Confirmé" : "En attente"}
+                  <span className={`ml-2 px-2 py-1 rounded-md text-[10px] font-bold shrink-0 ${
+                    r.status === "confirme" ? "bg-emerald-50 text-[#10AC84]" :
+                    r.status === "annule"   ? "bg-red-50 text-red-400" :
+                    "bg-orange-50 text-[#FF9F43]"
+                  }`}>
+                    {r.status === "confirme" ? "Confirmé" : r.status === "annule" ? "Annulé" : "En attente"}
                   </span>
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4 text-[#10AC84]" />
-                    <span className="text-xs font-medium text-gray-600">
-                      {new Date(r.appointment_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
-                    </span>
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-[#10AC84]" />
+                      <span className="text-xs font-medium text-gray-600">
+                        {new Date(r.appointment_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-medium text-gray-500">
+                        {new Date(r.appointment_date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-medium text-gray-500">
-                      {new Date(r.appointment_date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
+                  {r.status !== "annule" && (
+                    <button
+                      onClick={() => cancelRDV(r.id)}
+                      className="text-[10px] font-bold text-rose-400 hover:text-rose-600 transition-colors px-2 py-1 rounded-lg hover:bg-rose-50"
+                    >
+                      Annuler
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
