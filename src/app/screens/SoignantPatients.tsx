@@ -202,8 +202,12 @@ function PatientCard({ patient, onRdv, onContact }: {
 - CTA : ${patient.cta_id ?? "non précisé"} | Région : ${patient.region ?? "non précisée"}
 
 Donne une recommandation d'intervention courte (3 phrases max) selon la matrice PDV Positif+. Sois précis et concret.`;
-    const res = await aiService.sendMessage([], prompt, true);
-    setAiAnalysis(res);
+    try {
+      const res = await aiService.sendMessage([], prompt, true);
+      setAiAnalysis(res);
+    } catch {
+      setAiAnalysis("Analyse indisponible. Appelez la ligne Gindima au 200 365.");
+    }
     setAiLoading(false);
   }
 

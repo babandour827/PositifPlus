@@ -41,7 +41,7 @@ export function getAdherenceHistory(): AdherenceDay[] {
       const total = tasks.length;
       days.push({ date: label, pct: Math.round((done / total) * 100), done, total });
     } else {
-      days.push({ date: label, pct: i === 0 ? 0 : 0, done: 0, total: BASE_TASKS.length });
+      days.push({ date: label, pct: 0, done: 0, total: BASE_TASKS.length });
     }
   }
   return days;

@@ -6,7 +6,7 @@ import {
   ToggleLeft, ToggleRight, ChevronDown, UserPlus, Phone, Search,
 } from "lucide-react";
 import { Logo } from "../components/Logo";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { supabase } from "../../lib/supabaseClient";
 import { lockSettings } from "../hooks/useAppLock";
@@ -32,6 +32,16 @@ function DocumentsSection({ onBack, userId }: { onBack: () => void; userId: stri
   const [loadingDocs, setLoadingDocs] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [newDoc, setNewDoc] = useState({ name: "", type: "Bilan", date: "" });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+    setNewDoc({ name: nameWithoutExt, type: "Autre", date: new Date().toISOString().split("T")[0] });
+    setShowAdd(true);
+    e.target.value = "";
+  }
 
   useEffect(() => {
     if (!userId) { setLoadingDocs(false); return; }
@@ -116,14 +126,14 @@ function DocumentsSection({ onBack, userId }: { onBack: () => void; userId: stri
               <X className="w-4 h-4 text-gray-500" />
             </button>
           </div>
-          <input value={newDoc.name} onChange={e => setNewDoc({ ...newDoc, name: e.target.value })} placeholder="Nom du document" className={inp} />
-          <select value={newDoc.type} onChange={e => setNewDoc({ ...newDoc, type: e.target.value })} className={inp}>
+          <input id="doc-name" name="doc-name" value={newDoc.name} onChange={e => setNewDoc({ ...newDoc, name: e.target.value })} placeholder="Nom du document" className={inp} />
+          <select id="doc-type" name="doc-type" value={newDoc.type} onChange={e => setNewDoc({ ...newDoc, type: e.target.value })} className={inp}>
             <option value="Bilan">Bilan biologique</option>
             <option value="Ordonnance">Ordonnance</option>
             <option value="Compte-rendu">Compte-rendu médical</option>
             <option value="Autre">Autre</option>
           </select>
-          <input type="date" value={newDoc.date} onChange={e => setNewDoc({ ...newDoc, date: e.target.value })} className={inp} />
+          <input id="doc-date" name="doc-date" type="date" value={newDoc.date} onChange={e => setNewDoc({ ...newDoc, date: e.target.value })} className={inp} />
           <div className="flex gap-2">
             <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-600">Annuler</button>
             <button onClick={addDoc} className="flex-1 py-3 rounded-xl bg-[#10AC84] text-white text-sm font-bold shadow-md">Enregistrer</button>
@@ -135,8 +145,9 @@ function DocumentsSection({ onBack, userId }: { onBack: () => void; userId: stri
         </button>
       )}
 
-      <button className="w-full py-3 rounded-2xl border border-gray-200 text-gray-600 font-bold text-sm flex items-center justify-center gap-2 mt-2">
-        <Upload className="w-4 h-4" /> Importer depuis l'appareil photo
+      <input ref={fileInputRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleFileSelect} />
+      <button onClick={() => fileInputRef.current?.click()} className="w-full py-3 rounded-2xl border border-gray-200 text-gray-600 font-bold text-sm flex items-center justify-center gap-2 mt-2">
+        <Upload className="w-4 h-4" /> Importer depuis l'appareil
       </button>
     </div>
   );
@@ -259,11 +270,11 @@ function HistoriqueSection({ onBack, userId }: { onBack: () => void; userId: str
               <X className="w-4 h-4 text-gray-500" />
             </button>
           </div>
-          <input type="date" value={newEntry.record_date} onChange={e => setNewEntry({ ...newEntry, record_date: e.target.value })} className={inp} />
-          <input type="number" value={newEntry.cd4} onChange={e => setNewEntry({ ...newEntry, cd4: e.target.value })} placeholder="CD4 (/mm³) — optionnel" className={inp} />
-          <input value={newEntry.viral_load} onChange={e => setNewEntry({ ...newEntry, viral_load: e.target.value })} placeholder="Charge virale (ex: <50, 87) — optionnel" className={inp} />
-          <input type="number" step="0.1" value={newEntry.weight} onChange={e => setNewEntry({ ...newEntry, weight: e.target.value })} placeholder="Poids (kg) — optionnel" className={inp} />
-          <textarea value={newEntry.note} onChange={e => setNewEntry({ ...newEntry, note: e.target.value })} placeholder="Note du médecin ou observation — optionnel" className={inp + " resize-none"} rows={2} />
+          <input id="record-date" name="record-date" type="date" value={newEntry.record_date} onChange={e => setNewEntry({ ...newEntry, record_date: e.target.value })} className={inp} />
+          <input id="record-cd4" name="record-cd4" type="number" value={newEntry.cd4} onChange={e => setNewEntry({ ...newEntry, cd4: e.target.value })} placeholder="CD4 (/mm³) — optionnel" className={inp} />
+          <input id="record-viral-load" name="record-viral-load" value={newEntry.viral_load} onChange={e => setNewEntry({ ...newEntry, viral_load: e.target.value })} placeholder="Charge virale (ex: <50, 87) — optionnel" className={inp} />
+          <input id="record-weight" name="record-weight" type="number" step="0.1" value={newEntry.weight} onChange={e => setNewEntry({ ...newEntry, weight: e.target.value })} placeholder="Poids (kg) — optionnel" className={inp} />
+          <textarea id="record-note" name="record-note" value={newEntry.note} onChange={e => setNewEntry({ ...newEntry, note: e.target.value })} placeholder="Note du médecin ou observation — optionnel" className={inp + " resize-none"} rows={2} />
           <div className="flex gap-2">
             <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-600">Annuler</button>
             <button onClick={addEntry} disabled={!newEntry.record_date || saving} className="flex-1 py-3 rounded-xl bg-[#10AC84] text-white text-sm font-bold shadow-md disabled:opacity-50">
@@ -477,11 +488,14 @@ function SecuriteSection({ onBack, userEmail }: { onBack: () => void; userEmail:
         </h4>
         <div className="flex flex-col gap-3">
           <input
+            id="change-email"
+            name="email"
             type="email"
             value={newEmail}
             onChange={e => setNewEmail(e.target.value)}
             placeholder="Nouvelle adresse email"
             className={inp}
+            autoComplete="email"
           />
           <button
             onClick={changeEmail}
@@ -501,22 +515,28 @@ function SecuriteSection({ onBack, userEmail }: { onBack: () => void; userEmail:
         <div className="flex flex-col gap-3">
           <div className="relative">
             <input
+              id="new-password"
+              name="new-password"
               type={showNewPwd ? "text" : "password"}
               value={newPwd}
               onChange={e => setNewPwd(e.target.value)}
               placeholder="Nouveau mot de passe (min. 8 caractères)"
               className={inp + " pr-10"}
+              autoComplete="new-password"
             />
             <button onClick={() => setShowNewPwd(!showNewPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
               {showNewPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
           <input
+            id="confirm-password"
+            name="confirm-password"
             type="password"
             value={confirmPwd}
             onChange={e => setConfirmPwd(e.target.value)}
             placeholder="Confirmer le nouveau mot de passe"
             className={inp}
+            autoComplete="new-password"
           />
           {newPwd && confirmPwd && newPwd !== confirmPwd && (
             <p className="text-xs font-bold text-red-500 flex items-center gap-1">
@@ -563,10 +583,10 @@ function SecuriteSection({ onBack, userEmail }: { onBack: () => void; userEmail:
 
 // Paramètres généraux
 function ParametresSection({ onBack, userId }: { onBack: () => void; userId: string | null }) {
-  const [language, setLanguage] = useState("fr");
-  const [theme, setTheme] = useState<"light" | "auto">("light");
-  const [units, setUnits] = useState<"metric" | "imperial">("metric");
-  const [fontSize, setFontSize] = useState<"normal" | "large">("normal");
+  const [language, setLanguage] = useState<string>(() => localStorage.getItem("pp_language") || "fr");
+  const [theme, setTheme] = useState<"light" | "auto">(() => (localStorage.getItem("pp_theme") as "light" | "auto") || "light");
+  const [units, setUnits] = useState<"metric" | "imperial">(() => (localStorage.getItem("pp_units") as "metric" | "imperial") || "metric");
+  const [fontSize, setFontSize] = useState<"normal" | "large">(() => (localStorage.getItem("pp_fontsize") as "normal" | "large") || "normal");
   const [contactPhone, setContactPhone] = useState("");
   const [saved, setSaved] = useState(false);
   const [stealthMode, setStealthMode] = useState(localStorage.getItem("pp_stealth_enabled") === "true");
@@ -581,13 +601,37 @@ function ParametresSection({ onBack, userId }: { onBack: () => void; userId: str
 
   useEffect(() => {
     if (!userId) return;
-    supabase.from("profiles").select("contact_phone").eq("id", userId).single()
-      .then(({ data }) => { if (data?.contact_phone) setContactPhone(data.contact_phone); });
+    supabase.from("profiles").select("contact_phone, preferences").eq("id", userId).single()
+      .then(({ data }) => {
+        if (data?.contact_phone) setContactPhone(data.contact_phone);
+        // Restaurer préférences depuis Supabase (priorité sur localStorage)
+        const prefs = data?.preferences as Record<string, string> | null;
+        if (prefs) {
+          if (prefs.language) { setLanguage(prefs.language); localStorage.setItem("pp_language", prefs.language); }
+          if (prefs.theme)    { setTheme(prefs.theme as "light" | "auto"); localStorage.setItem("pp_theme", prefs.theme); }
+          if (prefs.units)    { setUnits(prefs.units as "metric" | "imperial"); localStorage.setItem("pp_units", prefs.units); }
+          if (prefs.fontSize) { setFontSize(prefs.fontSize as "normal" | "large"); localStorage.setItem("pp_fontsize", prefs.fontSize); }
+        }
+      });
   }, [userId]);
 
+  // Appliquer la taille de police immédiatement quand elle change
+  useEffect(() => {
+    document.documentElement.style.fontSize = fontSize === "large" ? "18px" : "16px";
+  }, [fontSize]);
+
   async function save() {
+    const prefs = { language, theme, units, fontSize };
+    localStorage.setItem("pp_language", language);
+    localStorage.setItem("pp_theme", theme);
+    localStorage.setItem("pp_units", units);
+    localStorage.setItem("pp_fontsize", fontSize);
+    document.documentElement.style.fontSize = fontSize === "large" ? "18px" : "16px";
     if (userId) {
-      await supabase.from("profiles").update({ contact_phone: contactPhone.trim() || null }).eq("id", userId);
+      await supabase.from("profiles").update({
+        contact_phone: contactPhone.trim() || null,
+        preferences: prefs,
+      }).eq("id", userId);
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -695,11 +739,14 @@ function ParametresSection({ onBack, userId }: { onBack: () => void; userId: str
             </div>
           </div>
           <input
+            id="contact-phone"
+            name="contact-phone"
             type="tel"
             value={contactPhone}
             onChange={e => setContactPhone(e.target.value)}
             placeholder="Numéro de téléphone (ex: +221 77 000 00 00)"
             className={inp}
+            autoComplete="tel"
           />
         </div>
 
@@ -760,6 +807,8 @@ function ParametresSection({ onBack, userId }: { onBack: () => void; userId: str
                 {pinStep === "enter" ? "Nouveau code PIN (4 chiffres)" : "Confirmer le code PIN"}
               </p>
               <input
+                id="pin-input"
+                name="pin"
                 type="password"
                 inputMode="numeric"
                 maxLength={4}
@@ -770,6 +819,7 @@ function ParametresSection({ onBack, userId }: { onBack: () => void; userId: str
                   else setPinB(val);
                 }}
                 placeholder="••••"
+                autoComplete="off"
                 className="w-full bg-gray-100 text-center text-lg font-bold tracking-[1rem] rounded-xl py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-slate-400/50 mb-2"
               />
               {pinError && <p className="text-xs text-red-500 font-bold mb-2">{pinError}</p>}
@@ -962,11 +1012,14 @@ function ConnectionsSection({ onBack, userId }: { onBack: () => void; userId: st
         <p className="text-xs font-medium text-gray-400 mb-3">Par adresse email ou numéro de téléphone</p>
         <div className="flex gap-2">
           <input
+            id="friend-search"
+            name="friend-search"
             value={searchQuery}
             onChange={e => { setSearchQuery(e.target.value); setSearchResult(null); setSearchError(""); }}
             onKeyDown={e => e.key === "Enter" && search()}
             placeholder="Email ou téléphone..."
             className={inp}
+            autoComplete="off"
           />
           <button
             onClick={() => search()}
@@ -1185,7 +1238,12 @@ export function Profile() {
   const displayName = profile?.pseudo || user?.email?.split("@")[0] || "Utilisateur";
   const memberSince = user?.created_at
     ? new Date(user.created_at).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
-    : "Jan 2026";
+    : null;
+  const daysAsMember = user?.created_at
+    ? Math.floor((Date.now() - new Date(user.created_at).getTime()) / 86400000)
+    : 0;
+  const badgeProgresContinue = daysAsMember >= 7 && meds.length > 0;
+  const badgeSuperMembre = daysAsMember >= 30;
 
   const menuItems = [
     { key: "connexions" as Section, icon: UserPlus, label: "Mes connexions & amis", color: "text-[#FF6B6B]", bg: "bg-rose-50" },
@@ -1217,11 +1275,17 @@ export function Profile() {
           </div>
           <div>
             <h2 className="text-xl font-black text-gray-900">{displayName}</h2>
-            <p className="text-sm font-medium text-gray-500">Membre depuis {memberSince}</p>
-            <div className="flex gap-2 mt-2">
-              <span className="bg-[#1DD1A1]/10 text-[#10AC84] text-[10px] font-bold px-2 py-1 rounded-md border border-[#1DD1A1]/20">Progrès continu</span>
-              <span className="bg-purple-50 text-purple-600 text-[10px] font-bold px-2 py-1 rounded-md border border-purple-100">Super membre</span>
-            </div>
+            {memberSince && <p className="text-sm font-medium text-gray-500">Membre depuis {memberSince}</p>}
+            {(badgeProgresContinue || badgeSuperMembre) && (
+              <div className="flex gap-2 mt-2">
+                {badgeProgresContinue && (
+                  <span className="bg-[#1DD1A1]/10 text-[#10AC84] text-[10px] font-bold px-2 py-1 rounded-md border border-[#1DD1A1]/20">Progrès continu</span>
+                )}
+                {badgeSuperMembre && (
+                  <span className="bg-purple-50 text-purple-600 text-[10px] font-bold px-2 py-1 rounded-md border border-purple-100">Super membre</span>
+                )}
+              </div>
+            )}
           </div>
         </div>
         {/* Tabs — masqués si sous-section active */}
@@ -1342,14 +1406,14 @@ export function Profile() {
                     <X className="w-4 h-4 text-gray-500" />
                   </button>
                 </div>
-                <input value={newMed.name} onChange={e => setNewMed({ ...newMed, name: e.target.value })} placeholder="Nom (ex: TDF/3TC/EFV)" className={inp} />
-                <input value={newMed.dosage} onChange={e => setNewMed({ ...newMed, dosage: e.target.value })} placeholder="Dosage (ex: 300mg)" className={inp} />
-                <select value={newMed.frequency} onChange={e => setNewMed({ ...newMed, frequency: e.target.value })} className={inp}>
+                <input id="profile-med-name" name="med-name" value={newMed.name} onChange={e => setNewMed({ ...newMed, name: e.target.value })} placeholder="Nom (ex: TDF/3TC/EFV)" className={inp} />
+                <input id="profile-med-dosage" name="med-dosage" value={newMed.dosage} onChange={e => setNewMed({ ...newMed, dosage: e.target.value })} placeholder="Dosage (ex: 300mg)" className={inp} />
+                <select id="profile-med-frequency" name="med-frequency" value={newMed.frequency} onChange={e => setNewMed({ ...newMed, frequency: e.target.value })} className={inp}>
                   <option value="daily">1×/jour</option>
                   <option value="twice_daily">2×/jour</option>
                   <option value="weekly">Hebdomadaire</option>
                 </select>
-                <input type="time" value={newMed.reminder_time} onChange={e => setNewMed({ ...newMed, reminder_time: e.target.value })} className={inp} />
+                <input id="profile-med-reminder" name="med-reminder" type="time" value={newMed.reminder_time} onChange={e => setNewMed({ ...newMed, reminder_time: e.target.value })} className={inp} />
                 <div className="flex gap-2">
                   <button onClick={() => setShowAddMed(false)} className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-600">Annuler</button>
                   <button onClick={addMed} className="flex-1 py-3 rounded-xl bg-[#10AC84] text-white text-sm font-bold shadow-md">Enregistrer</button>
@@ -1426,12 +1490,16 @@ export function Profile() {
                   </button>
                 </div>
                 <input
+                  id="rdv-cta-name"
+                  name="rdv-cta-name"
                   value={newRDV.cta_name}
                   onChange={e => setNewRDV({ ...newRDV, cta_name: e.target.value })}
                   placeholder="Nom du CTA (ex: CTA Hôpital de Fann)"
                   className={inp}
                 />
                 <input
+                  id="rdv-date"
+                  name="rdv-date"
                   type="datetime-local"
                   value={newRDV.appointment_date}
                   onChange={e => setNewRDV({ ...newRDV, appointment_date: e.target.value })}

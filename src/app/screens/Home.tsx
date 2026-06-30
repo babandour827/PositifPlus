@@ -91,24 +91,28 @@ export function Home() {
       const { data: { user } } = await supabase.auth.getUser();
 
       supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(1).maybeSingle()
-        .then(({ data }) => { if (data) setLastPost(data); });
+        .then(({ data }) => { if (data) setLastPost(data); }).catch(() => {});
 
       if (user) {
         supabase.from("appointments").select("*").eq("patient_id", user.id)
           .gte("appointment_date", new Date().toISOString())
           .order("appointment_date", { ascending: true }).limit(1).maybeSingle()
-          .then(({ data }) => { if (data) setNextAppt(data); });
+          .then(({ data }) => { if (data) setNextAppt(data); }).catch(() => {});
 
         supabase.from("medications").select("name, reminder_time").eq("user_id", user.id).eq("is_active", true)
-          .then(({ data }) => { if (data) setMeds(data); });
+          .then(({ data }) => { if (data) setMeds(data); }).catch(() => {});
       }
 
-      const [{ count: patients }, { count: soignants }, { count: posts }] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }).eq("is_soignant", false),
-        supabase.from("profiles").select("*", { count: "exact", head: true }).eq("is_soignant", true),
-        supabase.from("posts").select("*", { count: "exact", head: true }),
-      ]);
-      setPdvStats({ patients: patients ?? 0, soignants: soignants ?? 0, posts: posts ?? 0 });
+      try {
+        const [{ count: patients }, { count: soignants }, { count: posts }] = await Promise.all([
+          supabase.from("profiles").select("*", { count: "exact", head: true }).eq("is_soignant", false),
+          supabase.from("profiles").select("*", { count: "exact", head: true }).eq("is_soignant", true),
+          supabase.from("posts").select("*", { count: "exact", head: true }),
+        ]);
+        setPdvStats({ patients: patients ?? 0, soignants: soignants ?? 0, posts: posts ?? 0 });
+      } catch {
+        // Stats non critiques — la page reste fonctionnelle
+      }
 
       if (isSoignant) {
         const { data: allPatients } = await supabase

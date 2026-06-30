@@ -67,6 +67,8 @@ export function Auth() {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate("/app", { replace: true });
     });
+    // Précharger la liste des soignants pour le formulaire d'inscription patient
+    loadSoignants();
   }, [navigate]);
 
   function switchLang(code: string) {
@@ -176,10 +178,11 @@ export function Auth() {
         {/* ── CONNEXION ─────────────────────────────────────── */}
         {tab === "login" && (
           <>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+            <input id="login-email" name="email" type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="Email" className={inp} autoComplete="email" />
             <div className="relative">
               <input
+                id="login-password" name="password"
                 type={showPwd ? "text" : "password"} value={password}
                 onChange={e => setPassword(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleLogin()}
@@ -203,7 +206,7 @@ export function Auth() {
               <div className="grid grid-cols-2 gap-3">
                 {/* Patient */}
                 <button
-                  onClick={() => { setRole("patient"); loadSoignants(); }}
+                  onClick={() => setRole("patient")}
                   className={`relative flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 transition-all duration-200 text-left ${
                     role === "patient"
                       ? "border-[#10AC84] bg-emerald-50 shadow-md shadow-[#10AC84]/10"
@@ -261,12 +264,14 @@ export function Auth() {
                   <p className="text-[11px] font-bold text-emerald-800">Votre vrai nom n'est jamais affiché.</p>
                 </div>
                 <input
+                  id="register-pseudo" name="pseudo"
                   value={pseudo} onChange={e => setPseudo(e.target.value)}
                   placeholder="Pseudo anonyme (ex: Soleil2024)"
                   className={inp} autoComplete="off" maxLength={30}
                 />
                 <p className="text-[10px] text-gray-400 -mt-2">{pseudo.length}/30 caractères · min. 2</p>
                 <select
+                  id="register-soignant" name="soignant"
                   value={soignantId}
                   onChange={e => setSoignantId(e.target.value)}
                   disabled={soignantsLoading}
@@ -308,11 +313,13 @@ export function Auth() {
                   </p>
                 </div>
                 <input
+                  id="register-nom-pro" name="nom_pro"
                   value={nomPro} onChange={e => setNomPro(e.target.value)}
                   placeholder="Nom professionnel (ex: Dr. Fatou Diallo)"
                   className={inp} autoComplete="off"
                 />
                 <select
+                  id="register-specialite" name="specialite"
                   value={specialite} onChange={e => setSpecialite(e.target.value)}
                   className={inp + " appearance-none"}
                 >
@@ -320,6 +327,7 @@ export function Auth() {
                   {SPECIALITES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
                 <select
+                  id="register-cta" name="cta"
                   value={cta} onChange={e => setCta(e.target.value)}
                   className={inp + " appearance-none"}
                 >
@@ -332,13 +340,14 @@ export function Auth() {
             {/* 3. Champs communs */}
             {role && (
               <div className="flex flex-col gap-3">
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                <input id="register-email" name="email" type="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="Email" className={inp} autoComplete="email" />
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+                <input id="register-phone" name="tel" type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                   placeholder="Téléphone (optionnel, ex: +221 77 000 00 00)"
                   className={inp} autoComplete="tel" />
                 <div className="relative">
                   <input
+                    id="register-password" name="password"
                     type={showPwd ? "text" : "password"} value={password}
                     onChange={e => setPassword(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && handleRegister()}

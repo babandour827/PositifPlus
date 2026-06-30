@@ -27,16 +27,6 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: "success",   label: "Succès" },
 ];
 
-// Notifications par défaut si Supabase vide
-const FALLBACK: any[] = [
-  { id: "f1", type: "alert",     title: "Rappel ARV",       body: "N'oubliez pas de prendre votre traitement du soir à 20:00.",                     created_at: new Date(Date.now() - 10 * 60000).toISOString(),       is_read: false },
-  { id: "f2", type: "success",   title: "Objectif atteint", body: "Vous avez validé tous vos suivis aujourd'hui. Bravo !",                          created_at: new Date(Date.now() - 3 * 3600000).toISOString(),      is_read: true  },
-  { id: "f3", type: "community", title: "Nouveau message",  body: "Dr. Diallo a répondu à votre question dans la communauté.",                      created_at: new Date(Date.now() - 86400000).toISOString(),         is_read: true  },
-  { id: "f4", type: "system",    title: "Rapport disponible",body: "Votre synthèse mensuelle de santé est prête à être consultée.",                  created_at: new Date(Date.now() - 2 * 86400000).toISOString(),     is_read: true  },
-  { id: "f5", type: "alert",     title: "Rappel ARV matin", body: "Prenez votre traitement du matin à 8h00 avec de l'eau.",                         created_at: new Date(Date.now() - 3 * 86400000).toISOString(),     is_read: true  },
-  { id: "f6", type: "system",    title: "RDV demain",       body: "Vous avez un rendez-vous au CTA demain à 10h. Pensez à préparer vos documents.",  created_at: new Date(Date.now() - 4 * 86400000).toISOString(),     is_read: false },
-  { id: "f7", type: "success",   title: "7 jours consécutifs", body: "Félicitations ! Vous avez suivi votre traitement pendant 7 jours de suite.",  created_at: new Date(Date.now() - 5 * 86400000).toISOString(),     is_read: true  },
-];
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -60,7 +50,7 @@ export function Notifications() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) { setNotifs(FALLBACK); setLoading(false); return; }
+      if (!data.user) { setLoading(false); return; }
       const uid = data.user.id;
       setUserId(uid);
       loadNotifs(uid);
@@ -83,13 +73,13 @@ export function Notifications() {
       .eq("user_id", uid)
       .order("created_at", { ascending: false })
       .limit(50);
-    setNotifs(data && data.length > 0 ? data : FALLBACK);
+    setNotifs(data ?? []);
     setLoading(false);
   }
 
   async function markRead(id: string) {
     setNotifs(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
-    if (userId && !id.startsWith("f")) {
+    if (userId) {
       await supabase.from("notifications").update({ is_read: true }).eq("id", id);
     }
   }
@@ -106,7 +96,7 @@ export function Notifications() {
     setDeletingId(id);
     // Optimistic removal
     setNotifs(prev => prev.filter(n => n.id !== id));
-    if (userId && !id.startsWith("f")) {
+    if (userId) {
       await supabase.from("notifications").delete().eq("id", id);
     }
     setDeletingId(null);

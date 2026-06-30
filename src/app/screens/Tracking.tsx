@@ -4,6 +4,7 @@ import {
   Scale, History, Sparkles, Bell, AlertTriangle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { supabase } from "../../lib/supabaseClient";
 import { useStreak } from "../../hooks/useStreak";
 import { useDailyTasks, getAdherenceHistory } from "../../hooks/useDailyTasks";
@@ -104,37 +105,42 @@ export function Tracking() {
       setUserId(uid);
 
       supabase.from("medications").select("*").eq("user_id", uid).eq("is_active", true)
-        .then(({ data: d }) => { if (d) setMeds(d); });
+        .then(({ data: d }) => { if (d) setMeds(d); }).catch(() => {});
 
       supabase.from("appointments").select("*").eq("patient_id", uid)
         .gte("appointment_date", new Date().toISOString())
         .order("appointment_date", { ascending: true }).limit(1).maybeSingle()
-        .then(({ data: a }) => { if (a) setNextAppt(a); });
+        .then(({ data: a }) => { if (a) setNextAppt(a); }).catch(() => {});
 
       const today = new Date().toISOString().slice(0, 10);
       supabase.from("mood_logs").select("*").eq("user_id", uid)
         .gte("created_at", today + "T00:00:00Z")
         .order("created_at", { ascending: false }).limit(1).maybeSingle()
-        .then(({ data: m }) => { if (m) setMood(m.mood as MoodKey); });
+        .then(({ data: m }) => { if (m) setMood(m.mood as MoodKey); }).catch(() => {});
 
       const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
       supabase.from("mood_logs").select("*").eq("user_id", uid)
         .gte("created_at", sevenDaysAgo)
         .order("created_at", { ascending: false }).limit(7)
-        .then(({ data: h }) => { if (h) setMoodHistory(h); });
+        .then(({ data: h }) => { if (h) setMoodHistory(h); }).catch(() => {});
 
       supabase.from("weight_logs").select("*").eq("user_id", uid)
         .order("created_at", { ascending: false }).limit(6)
-        .then(({ data: w }) => { if (w) setWeightLogs(w); });
+        .then(({ data: w }) => { if (w) setWeightLogs(w); }).catch(() => {});
     });
   }, []);
 
   async function saveMood(m: MoodKey) {
     setMood(m);
     if (!userId) return;
+    const moodIcon = m === "bien" ? <Smile className="w-4 h-4 text-[#10AC84]" /> : m === "moyen" ? <Meh className="w-4 h-4 text-[#FF9F43]" /> : <Frown className="w-4 h-4 text-[#FF6B6B]" />;
+    const moodLabel = m === "bien" ? "Bien" : m === "moyen" ? "Moyen" : "Difficile";
     const { data } = await supabase.from("mood_logs")
       .insert({ user_id: userId, mood: m }).select().single();
-    if (data) setMoodHistory(prev => [data, ...prev.slice(0, 6)]);
+    if (data) {
+      setMoodHistory(prev => [data, ...prev.slice(0, 6)]);
+      toast.success(`Humeur enregistrée — ${moodLabel}`, { icon: moodIcon, duration: 2500 });
+    }
     await supabase.from("notifications").insert({
       user_id: userId,
       title: "Humeur enregistrée",
@@ -149,6 +155,7 @@ export function Tracking() {
       .insert({ user_id: userId, ...newMed, is_active: true }).select().single();
     if (data) {
       setMeds(m => [...m, data]);
+      toast.success(`${newMed.name} ajouté — rappel à ${newMed.reminder_time}`, { icon: <Pill className="w-4 h-4 text-[#FF9F43]" />, duration: 3000 });
       await supabase.from("notifications").insert({
         user_id: userId,
         title: `Rappel ARV activé : ${newMed.name}`,
@@ -180,7 +187,10 @@ export function Tracking() {
     if (!userId || isNaN(w) || w < 20 || w > 300) return;
     const { data } = await supabase.from("weight_logs")
       .insert({ user_id: userId, weight_kg: w }).select().single();
-    if (data) setWeightLogs(prev => [data, ...prev.slice(0, 5)]);
+    if (data) {
+      setWeightLogs(prev => [data, ...prev.slice(0, 5)]);
+      toast.success(`Poids enregistré — ${w} kg`, { icon: <Scale className="w-4 h-4 text-purple-500" />, duration: 2500 });
+    }
     setNewWeight(""); setShowAddWeight(false);
   }
 
@@ -340,7 +350,7 @@ export function Tracking() {
               return (
                 <button
                   key={task.id}
-                  onClick={() => toggle(task.id)}
+                  onClick={() => { toggle(task.id); if (!task.done) toast.success(`${task.title} — enregistré !`, { icon: <CheckCircle2 className="w-4 h-4 text-[#10AC84]" />, duration: 2000 }); }}
                   className={`flex items-center gap-3.5 p-3.5 rounded-2xl border transition-all active:scale-[0.98] text-left w-full ${
                     task.done
                       ? "bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-100"
@@ -533,6 +543,8 @@ export function Tracking() {
             {showAddWeight && (
               <div className="flex gap-2 mt-2">
                 <input
+                  id="weight-input"
+                  name="weight"
                   type="number"
                   value={newWeight}
                   onChange={e => setNewWeight(e.target.value)}
@@ -626,24 +638,24 @@ export function Tracking() {
                 </button>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Nom du médicament</label>
-                <input value={newMed.name} onChange={e => setNewMed({ ...newMed, name: e.target.value })} placeholder="ex: TDF/3TC/EFV" className={inp} />
+                <label htmlFor="med-name" className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Nom du médicament</label>
+                <input id="med-name" name="med-name" value={newMed.name} onChange={e => setNewMed({ ...newMed, name: e.target.value })} placeholder="ex: TDF/3TC/EFV" className={inp} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Dosage</label>
-                <input value={newMed.dosage} onChange={e => setNewMed({ ...newMed, dosage: e.target.value })} placeholder="ex: 300mg" className={inp} />
+                <label htmlFor="med-dosage" className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Dosage</label>
+                <input id="med-dosage" name="med-dosage" value={newMed.dosage} onChange={e => setNewMed({ ...newMed, dosage: e.target.value })} placeholder="ex: 300mg" className={inp} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Fréquence</label>
-                <select value={newMed.frequency} onChange={e => setNewMed({ ...newMed, frequency: e.target.value })} className={inp}>
+                <label htmlFor="med-frequency" className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Fréquence</label>
+                <select id="med-frequency" name="med-frequency" value={newMed.frequency} onChange={e => setNewMed({ ...newMed, frequency: e.target.value })} className={inp}>
                   <option value="daily">1×/jour</option>
                   <option value="twice_daily">2×/jour</option>
                   <option value="weekly">Hebdomadaire</option>
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Heure du rappel</label>
-                <input type="time" value={newMed.reminder_time} onChange={e => setNewMed({ ...newMed, reminder_time: e.target.value })} className={inp} />
+                <label htmlFor="med-reminder" className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Heure du rappel</label>
+                <input id="med-reminder" name="med-reminder" type="time" value={newMed.reminder_time} onChange={e => setNewMed({ ...newMed, reminder_time: e.target.value })} className={inp} />
               </div>
               <div className="flex gap-2 pt-1">
                 <button onClick={() => setShowAddMed(false)} className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-500">Annuler</button>

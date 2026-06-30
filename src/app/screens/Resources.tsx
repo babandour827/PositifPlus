@@ -1,14 +1,15 @@
 import {
-  Search, BookOpen, Video, ArrowUpRight, Bookmark, Star, MapPin,
+  Search, BookOpen, ArrowUpRight, Bookmark, Star, MapPin,
   Phone as PhoneIcon, Clock, ChevronRight as ChevronRightIcon,
-  PlayCircle, FileText, Lightbulb, Heart, Brain, Apple, Activity,
+  PlayCircle, FileText, Heart, Brain, Apple, Activity,
   Shield, Users, Pill, Baby, Sun, ChevronDown, ExternalLink,
-  TrendingUp, Award, AlertCircle, CheckCircle2, Globe, Download,
-  Stethoscope, Microscope, Syringe, HeartHandshake, Leaf, Zap,
+  TrendingUp, AlertCircle, CheckCircle2, Globe, Download,
+  Microscope, Syringe, HeartHandshake, Leaf, Zap,
   BookMarked, Link, Smartphone, Building2, HelpCircle, Bell, BarChart2, X as XIcon
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link as RouterLink } from "react-router";
+import { toast } from "sonner";
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
@@ -196,7 +197,7 @@ const USEFUL_LINKS = [
   { name: "CNLS Sénégal", desc: "Comité National de Lutte contre le Sida — actualités, chiffres officiels", url: "http://cnls.sn", icon: Building2, color: "text-blue-600", bg: "bg-blue-50" },
   { name: "ANCS", desc: "Alliance Nationale Contre le Sida — soutien juridique et psychologique", url: "http://ancs.sn", icon: HeartHandshake, color: "text-rose-600", bg: "bg-rose-50" },
   { name: "RNP+", desc: "Réseau National des Personnes Vivant avec le VIH — groupes de parole", url: "http://rnpplus.sn", icon: Users, color: "text-purple-600", bg: "bg-purple-50" },
-  { name: "SWAA-Sénégal", desc: "Société des Femmes contre le SIDA en Afrique — groupes femmes", url: "#", icon: Heart, color: "text-pink-600", bg: "bg-pink-50" },
+  { name: "SWAA-Sénégal", desc: "Société des Femmes contre le SIDA en Afrique — groupes femmes", url: "https://www.swaasenegal.org", icon: Heart, color: "text-pink-600", bg: "bg-pink-50" },
   { name: "OMS — VIH/SIDA", desc: "Recommandations mondiales, directives thérapeutiques, données épidémiologiques", url: "https://www.who.int/fr/news-room/fact-sheets/detail/hiv-aids", icon: Globe, color: "text-teal-600", bg: "bg-teal-50" },
   { name: "ONUSIDA", desc: "Programme commun des Nations Unies sur le VIH/SIDA — rapport mondial", url: "https://www.unaids.org/fr", icon: Globe, color: "text-indigo-600", bg: "bg-indigo-50" },
   { name: "Aidsmap", desc: "Base de données d'articles médicaux sur le VIH (en anglais et français)", url: "https://www.aidsmap.com/fr", icon: BookOpen, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -211,60 +212,80 @@ const HOTLINES = [
 ];
 
 const GUIDES = [
-  { title: "Guide du patient VIH — Sénégal 2024", desc: "Manuel complet pour les PVVIH : traitement, suivi, droits", pages: "48 pages", icon: BookMarked, color: "text-blue-600", bg: "bg-blue-50" },
-  { title: "Livret I=I : Indétectable = Intransmissible", desc: "Explication scientifique du principe I=I pour vous et vos proches", pages: "12 pages", icon: Microscope, color: "text-teal-600", bg: "bg-teal-50" },
-  { title: "Calendrier de suivi médical", desc: "Tableau des examens biologiques recommandés avec dates", pages: "2 pages", icon: FileText, color: "text-emerald-600", bg: "bg-emerald-50" },
-  { title: "Guide nutrition & ARV", desc: "Aliments à privilégier, interactions, recettes sénégalaises adaptées", pages: "24 pages", icon: Apple, color: "text-orange-600", bg: "bg-orange-50" },
-  { title: "Droits des PVVIH au Sénégal", desc: "Résumé des lois de protection, recours juridiques disponibles", pages: "16 pages", icon: Shield, color: "text-indigo-600", bg: "bg-indigo-50" },
-  { title: "Guide grossesse & VIH (PTME)", desc: "Protocole de prévention de la transmission mère-enfant", pages: "20 pages", icon: Baby, color: "text-rose-600", bg: "bg-rose-50" },
+  { title: "Guide du patient VIH — Sénégal 2024", desc: "Manuel complet pour les PVVIH : traitement, suivi, droits", pages: "48 pages", icon: BookMarked, color: "text-blue-600", bg: "bg-blue-50", url: "http://cnls.sn" },
+  { title: "Livret I=I : Indétectable = Intransmissible", desc: "Explication scientifique du principe I=I pour vous et vos proches", pages: "12 pages", icon: Microscope, color: "text-teal-600", bg: "bg-teal-50", url: "https://www.unaids.org/fr/undetectableuntransmittable" },
+  { title: "Calendrier de suivi médical", desc: "Tableau des examens biologiques recommandés avec dates", pages: "2 pages", icon: FileText, color: "text-emerald-600", bg: "bg-emerald-50", url: "https://www.who.int/fr/news-room/fact-sheets/detail/hiv-aids" },
+  { title: "Guide nutrition & ARV", desc: "Aliments à privilégier, interactions, recettes sénégalaises adaptées", pages: "24 pages", icon: Apple, color: "text-orange-600", bg: "bg-orange-50", url: "https://www.who.int/fr/news-room/fact-sheets/detail/hiv-aids" },
+  { title: "Droits des PVVIH au Sénégal", desc: "Résumé des lois de protection, recours juridiques disponibles", pages: "16 pages", icon: Shield, color: "text-indigo-600", bg: "bg-indigo-50", url: "http://ancs.sn" },
+  { title: "Guide grossesse & VIH (PTME)", desc: "Protocole de prévention de la transmission mère-enfant", pages: "20 pages", icon: Baby, color: "text-rose-600", bg: "bg-rose-50", url: "https://www.who.int/fr/news-room/fact-sheets/detail/mother-to-child-transmission-of-hiv" },
 ];
 
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
 
+// Statique — défini hors composant pour éviter les re-créations
+const catColors: Record<string, string> = {
+  Bases: "bg-blue-100 text-blue-700",
+  Traitement: "bg-teal-100 text-teal-700",
+  "Vie quotidienne": "bg-green-100 text-green-700",
+  Soutien: "bg-purple-100 text-purple-700",
+  Prévention: "bg-orange-100 text-orange-700",
+};
+
+const featuredArticles = ALL_ARTICLES.filter(a => a.featured);
+
 export function Resources() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [bookmarks, setBookmarks] = useState<Set<number>>(new Set(ALL_ARTICLES.filter(a => a.bookmarked).map(a => a.id)));
+  const [bookmarks, setBookmarks] = useState<Set<number>>(() => {
+    try {
+      const saved = localStorage.getItem("pp_bookmarks");
+      if (saved) return new Set(JSON.parse(saved) as number[]);
+    } catch {}
+    return new Set(ALL_ARTICLES.filter(a => a.bookmarked).map(a => a.id));
+  });
   const [tab, setTab] = useState<"articles" | "cta" | "faq" | "outils">("articles");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [faqCategory, setFaqCategory] = useState("Tout");
   const [ctaRegion, setCtaRegion] = useState("Tout");
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState<typeof ALL_ARTICLES[0] | null>(null);
 
-  const filteredArticles = ALL_ARTICLES.filter(a => {
-    const matchSearch = search === "" || a.title.toLowerCase().includes(search.toLowerCase()) || a.desc.toLowerCase().includes(search.toLowerCase());
+  // Persister les favoris dans localStorage à chaque changement
+  useEffect(() => {
+    localStorage.setItem("pp_bookmarks", JSON.stringify([...bookmarks]));
+  }, [bookmarks]);
+
+  const filteredArticles = useMemo(() => ALL_ARTICLES.filter(a => {
+    const q = search.toLowerCase();
+    const matchSearch = q === "" || a.title.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q);
     const matchCat = activeCategory === null || a.category === activeCategory;
     const matchBookmark = !showBookmarksOnly || bookmarks.has(a.id);
     return matchSearch && matchCat && matchBookmark;
-  });
+  }), [search, activeCategory, showBookmarksOnly, bookmarks]);
 
-  const featuredArticles = ALL_ARTICLES.filter(a => a.featured);
+  const filteredFaq = useMemo(() => {
+    const q = search.toLowerCase();
+    return FAQ.filter(f =>
+      (faqCategory === "Tout" || f.category === faqCategory) &&
+      (q === "" || f.q.toLowerCase().includes(q) || f.r.toLowerCase().includes(q))
+    );
+  }, [faqCategory, search]);
 
-  const filteredFaq = FAQ.filter(f =>
-    (faqCategory === "Tout" || f.category === faqCategory) &&
-    (search === "" || f.q.toLowerCase().includes(search.toLowerCase()) || f.r.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filteredCta = useMemo(() => {
+    const q = search.toLowerCase();
+    return CTA_LIST.filter(c =>
+      (ctaRegion === "Tout" || c.region === ctaRegion) &&
+      (q === "" || c.name.toLowerCase().includes(q) || c.address.toLowerCase().includes(q))
+    );
+  }, [ctaRegion, search]);
 
-  const filteredCta = CTA_LIST.filter(c =>
-    (ctaRegion === "Tout" || c.region === ctaRegion) &&
-    (search === "" || c.name.toLowerCase().includes(search.toLowerCase()) || c.address.toLowerCase().includes(search.toLowerCase()))
-  );
-
-  function toggleBookmark(id: number) {
+  const toggleBookmark = useCallback((id: number) => {
     setBookmarks(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-  }
-
-  const catColors: Record<string, string> = {
-    Bases: "bg-blue-100 text-blue-700",
-    Traitement: "bg-teal-100 text-teal-700",
-    "Vie quotidienne": "bg-green-100 text-green-700",
-    Soutien: "bg-purple-100 text-purple-700",
-    Prévention: "bg-orange-100 text-orange-700",
-  };
+  }, []);
 
   return (
     <div className="flex flex-col min-h-full font-sans bg-gray-50 pb-28">
@@ -278,6 +299,8 @@ export function Resources() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
+            id="resources-search"
+            name="resources-search"
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -317,7 +340,7 @@ export function Resources() {
                   return (
                     <div key={article.id} className="w-[280px] shrink-0 rounded-2xl overflow-hidden shadow-md border border-gray-100 snap-center relative group bg-white">
                       <div className="h-40 bg-gray-200 relative overflow-hidden">
-                        <img src={article.image} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={article.image} alt={article.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                         <div className="absolute bottom-0 left-0 right-0 p-3">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cat?.color || "bg-gray-100 text-gray-600"}`}>{article.category}</span>
@@ -335,7 +358,7 @@ export function Resources() {
                         <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed">{article.desc}</p>
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {article.time}</span>
-                          <button className="text-[10px] font-bold text-blue-500 flex items-center gap-0.5">Lire <ArrowUpRight className="w-3 h-3" /></button>
+                          <button onClick={() => setSelectedArticle(article)} className="text-[10px] font-bold text-blue-500 flex items-center gap-0.5">Lire <ArrowUpRight className="w-3 h-3" /></button>
                         </div>
                       </div>
                     </div>
@@ -405,7 +428,7 @@ export function Resources() {
                 return (
                   <div key={article.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex group">
                     <div className="w-24 h-24 bg-gray-200 relative overflow-hidden shrink-0">
-                      <img src={article.image} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={article.image} alt={article.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       {article.type === "Vidéo" && (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="w-8 h-8 rounded-full bg-black/50 flex items-center justify-center">
@@ -428,7 +451,7 @@ export function Resources() {
                           <button onClick={() => toggleBookmark(article.id)} className="p-1 rounded-full hover:bg-gray-100 transition-colors">
                             <Bookmark className={`w-3.5 h-3.5 ${bookmarks.has(article.id) ? "fill-amber-500 text-amber-500" : "text-gray-300"}`} />
                           </button>
-                          <button className="text-[10px] font-bold text-blue-500 flex items-center gap-0.5">Lire <ArrowUpRight className="w-3 h-3" /></button>
+                          <button onClick={() => setSelectedArticle(article)} className="text-[10px] font-bold text-blue-500 flex items-center gap-0.5">Lire <ArrowUpRight className="w-3 h-3" /></button>
                         </div>
                       </div>
                     </div>
@@ -710,9 +733,14 @@ export function Resources() {
                       <p className="text-xs font-medium text-gray-500 leading-tight mt-0.5">{guide.desc}</p>
                       <p className="text-[10px] font-bold text-gray-400 mt-1">{guide.pages}</p>
                     </div>
-                    <button className="shrink-0 w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center">
-                      <Download className="w-4 h-4 text-purple-600" />
-                    </button>
+                    <a
+                      href={guide.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center"
+                    >
+                      <ExternalLink className="w-4 h-4 text-purple-600" />
+                    </a>
                   </div>
                 );
               })}
@@ -729,10 +757,10 @@ export function Resources() {
             </h3>
             <div className="flex flex-col gap-3">
               {[
-                { name: "MyTherapy", desc: "Rappels médicaments, suivi de santé et journaux", platform: "iOS & Android", icon: Pill, iconColor: "text-teal-600", iconBg: "bg-teal-50" },
-                { name: "Medisafe", desc: "Gestion des ordonnances et interactions médicamenteuses", platform: "iOS & Android", icon: Bell, iconColor: "text-orange-600", iconBg: "bg-orange-50" },
-                { name: "HIV iChart", desc: "Référentiel clinique pour PVVIH et soignants", platform: "iOS & Android", icon: BarChart2, iconColor: "text-blue-600", iconBg: "bg-blue-50" },
-                { name: "AIDSinfo", desc: "Informations officielles sur les traitements (NIH)", platform: "Web & Mobile", icon: Microscope, iconColor: "text-purple-600", iconBg: "bg-purple-50" },
+                { name: "MyTherapy", desc: "Rappels médicaments, suivi de santé et journaux", platform: "iOS & Android", icon: Pill, iconColor: "text-teal-600", iconBg: "bg-teal-50", url: "https://www.mytherapyapp.com" },
+                { name: "Medisafe", desc: "Gestion des ordonnances et interactions médicamenteuses", platform: "iOS & Android", icon: Bell, iconColor: "text-orange-600", iconBg: "bg-orange-50", url: "https://medisafe.com" },
+                { name: "HIV iChart", desc: "Référentiel clinique pour PVVIH et soignants", platform: "iOS & Android", icon: BarChart2, iconColor: "text-blue-600", iconBg: "bg-blue-50", url: "https://www.hivichart.com" },
+                { name: "AIDSinfo", desc: "Informations officielles sur les traitements (NIH)", platform: "Web & Mobile", icon: Microscope, iconColor: "text-purple-600", iconBg: "bg-purple-50", url: "https://aidsinfo.nih.gov" },
               ].map((app, i) => (
                 <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3">
                   <div className={`w-12 h-12 ${app.iconBg} rounded-2xl flex items-center justify-center shrink-0`}>
@@ -743,9 +771,9 @@ export function Resources() {
                     <p className="text-xs font-medium text-gray-500">{app.desc}</p>
                     <p className="text-[10px] font-bold text-teal-600 mt-0.5">{app.platform}</p>
                   </div>
-                  <button className="shrink-0 px-3 py-1.5 bg-teal-50 text-teal-700 text-xs font-bold rounded-xl border border-teal-100">
+                  <a href={app.url} target="_blank" rel="noopener noreferrer" className="shrink-0 px-3 py-1.5 bg-teal-50 text-teal-700 text-xs font-bold rounded-xl border border-teal-100">
                     Voir
-                  </button>
+                  </a>
                 </div>
               ))}
             </div>
@@ -762,6 +790,62 @@ export function Resources() {
               <RouterLink to="/app/echanges" className="text-xs font-bold bg-[#10AC84] text-white px-3 py-1.5 rounded-full shadow-sm inline-block">
                 Démarrer une conversation →
               </RouterLink>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal article ── */}
+      {selectedArticle && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
+          onClick={() => setSelectedArticle(null)}
+        >
+          <div
+            className="w-full max-w-md bg-white rounded-t-3xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="relative h-48 bg-gray-200 overflow-hidden">
+              <img src={selectedArticle.image} alt={selectedArticle.title} loading="lazy" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+              <button
+                onClick={() => setSelectedArticle(null)}
+                className="absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center"
+              >
+                <XIcon className="w-4 h-4 text-white" />
+              </button>
+              <div className="absolute bottom-3 left-4 right-4">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${catColors[selectedArticle.category] ?? "bg-gray-100 text-gray-600"}`}>
+                  {selectedArticle.category}
+                </span>
+                <h3 className="text-base font-extrabold text-white mt-1 leading-tight">{selectedArticle.title}</h3>
+              </div>
+            </div>
+            <div className="p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="flex items-center gap-1 text-xs font-bold text-gray-400"><Clock className="w-3.5 h-3.5" /> {selectedArticle.time}</span>
+                <span className="flex items-center gap-1 text-xs font-bold text-gray-400">
+                  {selectedArticle.type === "Vidéo" ? <PlayCircle className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
+                  {selectedArticle.type}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed font-medium">{selectedArticle.desc}</p>
+              <div className="mt-4 flex items-center gap-2 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                <AlertCircle className="w-4 h-4 text-blue-500 shrink-0" />
+                <p className="text-xs font-medium text-blue-700">Pour en savoir plus, consultez votre soignant CTA ou utilisez l'Assistant IA.</p>
+              </div>
+              <button
+                onClick={() => { toggleBookmark(selectedArticle.id); setSelectedArticle({ ...selectedArticle }); }}
+                className={`w-full mt-3 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                  bookmarks.has(selectedArticle.id)
+                    ? "bg-amber-50 text-amber-600 border border-amber-200"
+                    : "bg-gray-100 text-gray-600 border border-gray-200"
+                }`}
+              >
+                <Bookmark className={`w-4 h-4 ${bookmarks.has(selectedArticle.id) ? "fill-amber-500 text-amber-500" : ""}`} />
+                {bookmarks.has(selectedArticle.id) ? "Retiré des favoris" : "Ajouter aux favoris"}
+              </button>
             </div>
           </div>
         </div>

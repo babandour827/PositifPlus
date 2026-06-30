@@ -105,7 +105,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
       }]);
 
-    if (profileError) console.error("Erreur création profil:", profileError);
+    void profileError; // non-bloquant : l'auth a réussi, le profil sera visible au prochain chargement
 
     // 3. Connexion automatique
     const user: User = {

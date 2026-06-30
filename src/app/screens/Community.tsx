@@ -13,11 +13,6 @@ const AVATAR_GRADIENTS = [
   "from-orange-400 to-amber-400",
 ];
 
-const STATIC_POSTS = [
-  { id: "s1", author: "Léa K.", time: "2h", title: "Mon témoignage : un an après", content: "Je voulais partager avec vous mon évolution. Le début a été difficile, mais avec le soutien de mon groupe, j'ai retrouvé l'équilibre.", likes: 124, comments: 32, badge: "Inspiration", badgeColor: "bg-purple-100 text-purple-700", avatarGradient: "from-pink-400 to-rose-400" },
-  { id: "s2", author: "Dr. Diallo", time: "5h", title: "Conseils pour le sommeil", content: "Le repos est crucial dans votre processus de guérison. Voici 3 astuces pour améliorer la qualité de votre sommeil.", likes: 89, comments: 15, badge: "Expert", badgeColor: "bg-[#1DD1A1]/20 text-[#10AC84]", avatarGradient: "from-teal-400 to-emerald-400" },
-  { id: "s3", author: "Anonyme", time: "1j", title: "Comment gérer le stress au travail ?", content: "Avez-vous des techniques pour ne pas laisser la pression professionnelle impacter votre suivi médical ?", likes: 45, comments: 28, badge: "Question", badgeColor: "bg-blue-100 text-blue-700", avatarGradient: "from-gray-300 to-gray-400" },
-];
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -38,6 +33,7 @@ export function Community() {
   const [fabPost, setFabPost] = useState("");
   const [fabGroup, setFabGroup] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [recentPosts, setRecentPosts] = useState<any[]>([]);
   // Likes persistés
   const [userReactions, setUserReactions] = useState<Set<string>>(new Set());
   // Comments
@@ -54,7 +50,9 @@ export function Community() {
     supabase.from("groups").select("*").order("member_count", { ascending: false })
       .then(({ data }) => {
         if (data) { setGroups(data); if (data.length > 0) setFabGroup(data[0].id); }
-      });
+      }).catch(() => {});
+    supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(10)
+      .then(({ data }) => { if (data) setRecentPosts(data); }).catch(() => {});
   }, []);
 
   // Realtime nouveaux posts dans le groupe actif
@@ -325,97 +323,93 @@ export function Community() {
         </div>
       )}
 
-      {/* Posts statiques avec likes/comments */}
+      {/* Posts récents de la communauté */}
       <div className="px-5 mt-2 flex flex-col gap-4">
-        {STATIC_POSTS
-          .filter(p => filter === "Tout"
-            || (filter === "Témoignages" && p.badge === "Inspiration")
-            || (filter === "Experts" && p.badge === "Expert")
-            || (filter === "Questions" && p.badge === "Question"))
-          .map(post => {
-            const isLiked = userReactions.has(post.id);
-            const isCommentsOpen = openComments.has(post.id);
-            return (
-              <div key={post.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex gap-3 items-center">
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${post.avatarGradient} p-0.5 shadow-sm`}>
-                        <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
-                          <span className="font-bold text-[10px] uppercase text-gray-600">{post.author.slice(0, 2)}</span>
-                        </div>
+        {recentPosts.length === 0 && (
+          <div className="text-center text-gray-400 py-10">
+            <MessageCircle className="w-10 h-10 mx-auto mb-3 text-gray-200" />
+            <p className="text-sm font-medium">Aucun post pour l'instant.</p>
+            <p className="text-xs mt-1">Rejoignez un groupe pour démarrer la conversation.</p>
+          </div>
+        )}
+        {recentPosts.map((post, i) => {
+          const isLiked = userReactions.has(post.id);
+          const isCommentsOpen = openComments.has(post.id);
+          return (
+            <div key={post.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]} p-0.5 shadow-sm`}>
+                    <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
+                      <span className="font-bold text-[10px] uppercase text-gray-600">AN</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">Membre anonyme</p>
+                    <p className="text-xs font-medium text-gray-400">{timeAgo(post.created_at)}</p>
+                  </div>
+                </div>
+                <p className="text-sm font-medium text-gray-700 leading-relaxed mb-3">{post.content}</p>
+                <div className="flex items-center gap-5 pt-3 border-t border-gray-50">
+                  <button
+                    onClick={() => toggleLike(post.id, post.likes_count || 0)}
+                    className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${isLiked ? "text-[#FF6B6B]" : "text-gray-500 hover:text-[#FF6B6B]"}`}
+                  >
+                    <Heart className={`w-4 h-4 ${isLiked ? "fill-[#FF6B6B]" : ""}`} />
+                    {isLiked ? (post.likes_count || 0) + 1 : (post.likes_count || 0)}
+                  </button>
+                  <button
+                    onClick={() => toggleComments(post.id)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-[#10AC84] transition-colors"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    {(commentMap[post.id]?.length ?? 0) > 0 ? commentMap[post.id].length : "Commenter"}
+                    {isCommentsOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </button>
+                  <button
+                    aria-label="Partager ce post"
+                    onClick={() => navigator.share?.({ text: post.content }).catch(() => {})}
+                    className="flex items-center gap-1.5 text-xs font-bold text-gray-500 ml-auto hover:text-[#FF9F43] transition-colors"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              {isCommentsOpen && (
+                <div className="bg-gray-50 border-t border-gray-100 px-4 py-3 flex flex-col gap-2">
+                  {loadingComments.has(post.id) && <p className="text-xs text-gray-400 text-center py-2">Chargement...</p>}
+                  {(commentMap[post.id] || []).map((c: any, ci: number) => (
+                    <div key={c.id || ci} className="flex items-start gap-2">
+                      <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${AVATAR_GRADIENTS[(ci + 1) % AVATAR_GRADIENTS.length]} flex items-center justify-center shrink-0`}>
+                        <span className="text-white text-[9px] font-bold">AN</span>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-sm text-gray-900 flex items-center gap-1">
-                          {post.author} {post.badge === "Expert" && <Sparkles className="w-3 h-3 text-[#FF9F43]" />}
-                        </h4>
-                        <p className="text-xs font-medium text-gray-400">Il y a {post.time}</p>
+                      <div className="flex-1 bg-white rounded-xl px-3 py-2 border border-gray-100">
+                        <p className="text-xs font-bold text-gray-500 mb-0.5">Anonyme · {timeAgo(c.created_at)}</p>
+                        <p className="text-xs font-medium text-gray-700 leading-relaxed">{c.content}</p>
                       </div>
                     </div>
-                    <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${post.badgeColor}`}>{post.badge}</span>
-                  </div>
-                  <h3 className="font-bold text-base text-gray-900 mb-1 leading-snug">{post.title}</h3>
-                  <p className="text-sm font-medium text-gray-600 mb-4 leading-relaxed">{post.content}</p>
-                  <div className="flex items-center gap-5 pt-3 border-t border-gray-50">
-                    <button
-                      onClick={() => toggleLike(post.id, post.likes)}
-                      className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${isLiked ? "text-[#FF6B6B]" : "text-gray-500 hover:text-[#FF6B6B]"}`}
-                    >
-                      <Heart className={`w-4 h-4 ${isLiked ? "fill-[#FF6B6B]" : ""}`} />
-                      {isLiked ? post.likes + 1 : post.likes}
-                    </button>
-                    <button
-                      onClick={() => toggleComments(post.id)}
-                      className="flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-[#10AC84] transition-colors"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      {(commentMap[post.id]?.length ?? post.comments)}
-                      {isCommentsOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                    </button>
-                    <button
-                      aria-label="Partager ce post"
-                      onClick={() => navigator.share?.({ title: post.title, text: post.content }).catch(() => {})}
-                      className="flex items-center gap-1.5 text-xs font-bold text-gray-500 ml-auto hover:text-[#FF9F43] transition-colors"
-                    >
-                      <Share2 className="w-4 h-4" />
+                  ))}
+                  {!loadingComments.has(post.id) && (commentMap[post.id] || []).length === 0 && (
+                    <p className="text-xs text-gray-400 text-center py-1">Aucun commentaire. Soyez le premier !</p>
+                  )}
+                  <div className="flex gap-2 mt-1">
+                    <input
+                      value={commentInputs[post.id] || ""}
+                      onChange={e => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                      onKeyDown={e => e.key === "Enter" && sendComment(post.id)}
+                      placeholder="Votre commentaire (anonyme)..."
+                      className="flex-1 bg-white text-xs font-medium rounded-xl py-2 px-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#10AC84]/30"
+                    />
+                    <button onClick={() => sendComment(post.id)} disabled={!commentInputs[post.id]?.trim()}
+                      className="w-9 h-9 bg-[#10AC84] rounded-xl flex items-center justify-center shadow-sm disabled:opacity-40">
+                      <Send className="w-3.5 h-3.5 text-white" />
                     </button>
                   </div>
                 </div>
-                {isCommentsOpen && (
-                  <div className="bg-gray-50 border-t border-gray-100 px-4 py-3 flex flex-col gap-2">
-                    {loadingComments.has(post.id) && <p className="text-xs text-gray-400 text-center py-2">Chargement...</p>}
-                    {(commentMap[post.id] || []).map((c: any, ci: number) => (
-                      <div key={c.id || ci} className="flex items-start gap-2">
-                        <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${AVATAR_GRADIENTS[(ci + 1) % AVATAR_GRADIENTS.length]} flex items-center justify-center shrink-0`}>
-                          <span className="text-white text-[9px] font-bold">AN</span>
-                        </div>
-                        <div className="flex-1 bg-white rounded-xl px-3 py-2 border border-gray-100">
-                          <p className="text-xs font-bold text-gray-500 mb-0.5">Anonyme · {timeAgo(c.created_at)}</p>
-                          <p className="text-xs font-medium text-gray-700 leading-relaxed">{c.content}</p>
-                        </div>
-                      </div>
-                    ))}
-                    {!loadingComments.has(post.id) && (commentMap[post.id] || []).length === 0 && (
-                      <p className="text-xs text-gray-400 text-center py-1">Aucun commentaire. Soyez le premier !</p>
-                    )}
-                    <div className="flex gap-2 mt-1">
-                      <input
-                        value={commentInputs[post.id] || ""}
-                        onChange={e => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
-                        onKeyDown={e => e.key === "Enter" && sendComment(post.id)}
-                        placeholder="Votre commentaire (anonyme)..."
-                        className="flex-1 bg-white text-xs font-medium rounded-xl py-2 px-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#10AC84]/30"
-                      />
-                      <button onClick={() => sendComment(post.id)} disabled={!commentInputs[post.id]?.trim()}
-                        className="w-9 h-9 bg-[#10AC84] rounded-xl flex items-center justify-center shadow-sm disabled:opacity-40">
-                        <Send className="w-3.5 h-3.5 text-white" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* FAB */}

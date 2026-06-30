@@ -238,7 +238,8 @@ export default function Chat() {
       .then(({ data }) => {
         setSoignants((data || []).map(profileToContact));
         setLoadingSoignants(false);
-      });
+      })
+      .catch(() => setLoadingSoignants(false));
 
     supabase.from("groups").select("*").order("member_count", { ascending: false })
       .then(({ data }) => { setGroups(data || []); setLoadingGroups(false); });
@@ -324,14 +325,14 @@ export default function Chat() {
     setMsgs(loaded);
     setLoadingMsgs(false);
 
-    // Supprimer les expirés côté DB
-    supabase.from("messages")
+    // Supprimer les expirés côté DB (fire-and-forget)
+    void supabase.from("messages")
       .delete()
       .lt("expires_at", new Date().toISOString())
       .not("expires_at", "is", null);
 
-    // Marquer les messages reçus comme lus
-    supabase.from("messages")
+    // Marquer les messages reçus comme lus (fire-and-forget)
+    void supabase.from("messages")
       .update({ is_read: true })
       .eq("receiver_id", userId)
       .eq("sender_id", contact.id)

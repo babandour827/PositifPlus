@@ -75,7 +75,7 @@ async function callLLM(systemPrompt: string, history: ChatMessage[], userMessage
       headers: { Authorization: `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ model: GROQ_MODEL, messages, max_tokens: 600, temperature: 0.7 }),
     });
-    if (!res.ok) return "Difficulté technique. Réessayez ou appelez le 200 365.";
+    if (!res.ok) return `Difficulté technique (${res.status}). Réessayez ou appelez le 200 365.`;
     const data = await res.json();
     return data.choices?.[0]?.message?.content ?? "Pas de réponse. Appelez le 200 365.";
   } catch {

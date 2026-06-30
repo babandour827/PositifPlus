@@ -3,6 +3,7 @@ import {
   Home, MessageCircle, HeartPulse, BookOpen, User, Phone, Bell,
   ChevronLeft, Flame, UserRound, CalendarCheck, MessageSquare, Stethoscope,
 } from "lucide-react";
+import { Toaster } from "./ui/sonner";
 import { cn } from "../../lib/utils";
 import { Link } from "react-router";
 import { useState, useEffect } from "react";
@@ -148,6 +149,8 @@ export function Layout() {
           ? <SoignantNav />
           : <PatientNav />
       )}
+
+      <Toaster position="top-center" richColors closeButton />
     </div>
   );
 }

@@ -29,6 +29,10 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.svg', '**/*.csv'],
   build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -39,5 +43,8 @@ export default defineConfig({
         },
       },
     },
+  },
+  server: {
+    hmr: { overlay: false },
   },
 })
